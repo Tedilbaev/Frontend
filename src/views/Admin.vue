@@ -75,7 +75,7 @@
             <div class="text-center" style="align-items: center; justify-content: center;">
               <button type="button" class="btn custom-btn" id="change">Изменить объявление</button>
               <button type="button" class="btn custom-btn" id="delete" style="color: #f2f2f2; background-color: #d9534f;">Удалить объявление</button>
-              <button type="button" class="btn custom-btn" id="cancel">Отмена</button>
+              <button type="button" class="btn custom-btn" id="cancel" @click="closeDialog">Отмена</button>
             </div>
           </div>
         </dialog>
@@ -84,7 +84,7 @@
       <div class="row" style="display: flex; justify-content: center;">
         <div class="col-md-5">
           <h1 class="head">Все объявления:</h1>
-          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу">
+          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу" max>
           <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;">
             <option value="name" selected="selected">Название</option>
             <option value="type">Тип услуги</option>
@@ -102,23 +102,15 @@
                 </tr>
               </thead>
               <tbody>
-                <tr class="dialogbar">
-                  <td>1</td>
-                  <td>Услуги сантехника</td>
-                  <td>Сантехника</td>
-                  <td>5000.00</td>
-                  <td>19.06.2004</td>
-                  <td>Бла-бла...</td>
+                <tr v-for="ad in ads" :key="ad.id" @click="showDialog">
+                  <td>{{ad.id}}</td>
+                  <td>{{ ad.title }}</td>
+                  <td>{{ ad.category }}</td>
+                  <td>{{ ad.price }}</td>
+                  <td>{{ formatDate(ad.createdAt) }}</td>
+                  <td style="white-space: wrap;">{{ad.description}}</td>
                 </tr>
                 <!-- Остальные строки -->
-                <tr>
-                  <td>2</td>
-                  <td>Услуги электрика</td>
-                  <td>Сантехника</td>
-                  <td>10000.00</td>
-                  <td>19.06.2004</td>
-                  <td>Активно</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -144,14 +136,14 @@
                   <th scope="col" style="font-size: 15px;">Статус</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
+              <tbody >
+                <tr >
                   <td>1</td>
                   <td>Услуги сантехника</td>
                   <td>Сантехника</td>
                   <td>5000.00</td>
                   <td>19.06.2004</td>
-                  <td>Активно</td>
+                  <td>Бла-бла...</td>
                 </tr>
                 <!-- Остальные строки -->
                 <tr>
@@ -175,6 +167,8 @@
 <script>
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
+import { mapActions } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 export default {
 name: 'Admin',
@@ -182,5 +176,68 @@ components: {
     Header,
     Footer,
 },
+data() {
+    return {
+      ads: [],
+      error: '',
+      apiBaseUrl: 'http://localhost:8080/api/user',
+      serverBaseUrl: 'http://localhost:8080',
+    }
+  },
+  methods: {
+    ...mapActions(useUserStore, ['fetchUserProfile']),
+    async fetchUserAds() {
+      const token = localStorage.getItem('jwt')
+      console.log('Токен для объявлений:', token)
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/my-ads`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.ads = await response.json()
+          console.log(this.ads)
+          this.ads = this.ads.map((ad) => ({
+            ...ad
+          }))
+          console.log('Объявления пользователя:', this.ads)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки объявлений: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('ru-RU')
+    },
+    showDialog() {
+      document.querySelector('dialog').showModal()
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
+    },
+    closeDialog() {
+      document.querySelector('dialog').close()
+    },
+  },
+  mounted() {
+    // this.fetchUserProfile()
+    this.fetchUserAds()
+  }
 }
 </script>

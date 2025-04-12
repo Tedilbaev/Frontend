@@ -141,8 +141,9 @@ input:focus::placeholder {
   position: absolute;
   width: 100%;
   bottom: 0;
-  opacity: 75%;
+  opacity: 90%;
   border-radius: 20px;
+  box-shadow: 0 0 4px rgb(160, 160, 160);
   /* transition: all .1s ease-out;  */
 }
 

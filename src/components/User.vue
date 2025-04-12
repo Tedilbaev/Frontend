@@ -8,6 +8,7 @@
       height="200"
       alt="Аватар"
       @click="showLightbox(user.avatarUrl)"
+      style="cursor: pointer;"
     />
     <img
       v-else
