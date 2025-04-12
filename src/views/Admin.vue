@@ -84,7 +84,7 @@
       <div class="row" style="display: flex; justify-content: center;">
         <div class="col-md-5">
           <h1 class="head">Все объявления:</h1>
-          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу" max>
+          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу">
           <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;">
             <option value="name" selected="selected">Название</option>
             <option value="type">Тип услуги</option>
