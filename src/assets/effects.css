@@ -1,0 +1,278 @@
+.image-round {
+  border-radius: 100px; /* Радиус скругления */
+  border: 3px solid green; /* Параметры рамки */
+  box-shadow: 0 0 7px #666; /* Параметры тени */
+}
+
+.head {
+  margin: 10px 0px 10px 0px;
+  text-align: left;
+}
+
+.margin {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.l-button {
+  width: 75%;
+  border-radius: 20px;
+  border-bottom: 1px solid #2b8025;
+  border-left: 1px solid #2b8025;
+  background-color: white;
+  color: black;
+  box-shadow: -8px 7px 8px -6px #bac2c9;
+  transition: 0.5s; /*эта штука задает правила перехода между состояниями*/
+}
+
+.custom-btn {
+  border-radius: 20px;
+  border-bottom: 1px solid #2b8025;
+  border-left: 1px solid #2b8025;
+  background-color: white;
+  color: black;
+  box-shadow: -8px 7px 8px -6px #bac2c9;
+  height: 100%;
+  margin-bottom: 5px;
+  margin-left: 5px;
+  transition: 0.5s;
+}
+
+.custom-btn:hover {
+  color: #f2f2f2;
+  background-color: #2b8025;
+}
+
+.custom-text {
+  border: 0px;
+  border-bottom: 1px solid #2b8025;
+  border-top: 1px solid #2b8025;
+  border-radius: 20px;
+  max-height: 100%;
+  width: 50%;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 30px;
+  outline: none; /*Убирает некрасивую обводку во время печатания*/
+}
+
+.custom-text:focus {
+  border-left: 1px solid #2b8025;
+  border-right: 1px solid #2b8025;
+}
+
+.wrap-text {
+  height: 150px;
+  resize: none;
+}
+
+input:focus::placeholder {
+  color: transparent; /*задаем стиль для input, что при нажатии placeholder исчезает*/
+}
+
+.l-button:hover {
+  color: #f2f2f2;
+  background-color: #2b8025;
+}
+
+.create-line {
+  width: 100%;
+  border-top: 2px solid #a8aaac;
+  margin-bottom: 15px;
+}
+
+.order {
+  box-shadow: 0 0 4px #4b4a4a;
+  padding: 0px;
+  border-radius: 20px;
+  height: 400px;
+  /* transition: all .2s ease-in-out;   */
+}
+
+.order #text-order {
+  opacity: 0;
+  visibility: hidden; /* Добавлено */
+  transition: visibility ease-in; /* Обновлено */
+}
+
+.order:hover #text-order {
+  opacity: 1;
+  visibility: visible; /* Добавлено */
+}
+
+.order .order-info:hover {
+  height: 75%;
+  opacity: 100%;
+}
+/* .order #text-order{
+    display: none;
+    transition: all .4s ease-in;
+
+} */
+/*
+.order #text-order p{
+    display: none;
+    opacity: 0%;
+    transition: opacity .4s ease-in .4s;
+}
+*/
+.order:hover {
+  cursor: pointer;
+}
+/*
+.order .order-info:hover {
+    height: 75%;
+    opacity: 100%;
+
+}
+.order:hover #text-order {
+    opacity: 100%;
+} 
+.order:hover #text-order p{
+    display: block;
+    opacity: 100%;
+}
+*/
+.order-info {
+  background-color: white;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 30%;
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  opacity: 75%;
+  border-radius: 20px;
+  /* transition: all .1s ease-out;  */
+}
+
+/* .order-info:hover #text-order {
+     display: block; 
+}
+
+.order-info:hover {
+    height: 75%;
+    opacity: 100%;
+} */
+/* 
+#text-order {
+    display: none;
+} */
+
+.table-order {
+  margin-top: 20px;
+  display: grid; /*сетОЧКА*/
+  grid-template-columns: repeat(
+    3,
+    1fr
+  ); /*по сути три раза заполняется строка таблицы клетками, и так далее*/
+  gap: 30px; /*расстояние между столбиками*/
+}
+
+.image-order {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 20px;
+  /* transition: all .2s ease-in-out; */
+}
+
+.image-order:hover + .order-info {
+  height: 75%;
+  opacity: 100%;
+}
+/* 
+.image-order:hover + .order-info #text-order{
+    display: block;
+} */
+
+.holder {
+  width: 100%;
+  display: block;
+}
+.content {
+  background: #fff;
+  padding: 28px 26px 33px 25px; /*внутренний отступ*/
+}
+.popup {
+  border-radius: 20px;
+  border-color: white;
+  border: 0px;
+  background: white;
+  margin: 50px auto 0;
+  padding: 6px;
+  position: fixed; /*типо высшая позиция над объектами*/
+  width: 50%;
+  height: 70%;
+  top: 10%;
+  box-shadow: 0px 5px 10px 2px rgba(34, 60, 80, 0.2);
+  z-index: 20;
+}
+
+select {
+  background-color: white;
+  border-radius: 20px;
+  border-color: #2b8025;
+  border-top: white;
+  border-right: white;
+}
+
+select:focus {
+  border: 1px solid #2b8025;
+}
+
+option:checked,
+option:hover {
+  box-shadow: 0 0 10px 100px #fed20f inset;
+  transition: all 0.2s ease-in-out;
+}
+/*у инпута типа файл задает настройку самой кнопки выбора файла*/
+input[type='file']::file-selector-button {
+  border-radius: 20px;
+  border-bottom: 1px solid #2b8025;
+  border-left: 1px solid #2b8025;
+  border-top: 1px solid white;
+  border-right: 1px solid white;
+  background-color: white;
+  transition: 0.4s;
+  outline: none;
+}
+
+input[type='file']::file-selector-button:hover {
+  color: #f2f2f2;
+  background-color: #2b8025;
+}
+
+.radiobutton {
+  padding-left: 20px;
+  margin-right: 5px;
+  margin-left: 10px;
+  margin-bottom: 15px;
+}
+
+.preview {
+  display: none;
+  /* border: 1px solid #2b8025; */
+  border-radius: 15px;
+}
+
+#preview {
+  width: 100%;
+  height: 450px;
+  border-radius: 15px;
+  padding: 5px;
+}
+
+.delpopup {
+  border-radius: 20px;
+  border-color: white;
+  border: 0px;
+  background: white;
+  margin: 5px auto 0;
+  padding: 6px;
+  position: fixed; /*типо высшая позиция над объектами*/
+  width: 40%;
+  height: 30%;
+  top: 30%;
+  box-shadow: 0px 5px 10px 2px rgba(34, 60, 80, 0.2);
+  z-index: 201;
+}

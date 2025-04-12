@@ -1,0 +1,96 @@
+.contain {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 600px;
+}
+
+.center {
+  width: 450px;
+  background-color: white;
+  padding: 20px;
+}
+
+.reg-btn {
+  border-radius: 20px;
+  background-color: white;
+  border-top: none;
+  border-right: none;
+  border-bottom: 1px solid #2b8025;
+  border-left: 1px solid #2b8025;
+  color: black;
+  box-shadow: -8px 7px 8px -6px #bac2c9;
+  height: 30px;
+  width: 100%;
+  margin-bottom: 5px;
+  transition: 0.3s;
+}
+
+.reg-btn:hover {
+  color: #f2f2f2;
+  background-color: #2b8025;
+}
+
+.sign-btn {
+  border: none;
+  border-radius: 20px;
+  background-color: #2b8025;
+  color: #f2f2f2;
+  box-shadow: -8px 7px 8px -6px #bac2c9;
+  height: 30px;
+  width: 100%;
+  margin-bottom: 5px;
+  transition: 0.3s;
+  outline: none;
+}
+
+.sign-btn:hover {
+  color: black;
+  background-color: white;
+  border-bottom: 1px solid #2b8025;
+  border-left: 1px solid #2b8025;
+}
+.sign-btn:active {
+  background-color: #2b8025;
+  color: #f2f2f2;
+}
+
+.reg-btn:active {
+  background-color: white;
+  border-bottom: 1px solid #2b8025;
+  border-left: 1px solid #2b8025;
+  color: black;
+}
+.custom-text {
+  border: 0px;
+  border-bottom: 1px solid #2b8025;
+  border-top: 1px solid #2b8025;
+  border-radius: 20px;
+  max-height: 100%;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 30px;
+  outline: none; /*Убирает некрасивую обводку во время печатания*/
+}
+
+.custom-text:focus {
+  border: 1px solid #2b8025; /*Убирает некрасивую обводку во время печатания*/
+}
+
+div {
+  border-top: #2b8025;
+  border-bottom: #2b8025;
+  border-radius: 20px;
+}
+
+.sub-div {
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+body {
+  font-family: Arial !important;
+  background-color: #eef3f7 !important;
+  padding: 50px !important;
+}
