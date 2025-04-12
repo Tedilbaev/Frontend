@@ -37,6 +37,7 @@
                 width="410"
                 height="410"
                 alt="Фото объявления"
+                style="object-fit:fill; max-width: 100%; max-height: 100%;"
               />
               <img
                 v-else
@@ -48,11 +49,17 @@
               />
               <div class="order-info">
                 <h5 class="text-center" style="margin: 0 auto">{{ ad.title }}</h5>
-                <p style="margin: 0 0 0 0">Город: {{ ad.location || 'Не указан' }}</p>
+                <h6 style="margin-top: 5px; text-align: center;">Город: {{ ad.location || 'Не указан' }}</h6>
                 <div id="text-order">
                   <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
                   <p>Цена: {{ ad.price }} рублей</p>
                   <p>Дата объявления: {{ formatDate(ad.createdAt) }}</p>
+                  <p style="display: -webkit-box;
+                  -webkit-line-clamp: 4;
+                  -webkit-box-orient: vertical; 
+                  overflow: hidden;
+                  word-break:keep-all;">
+                  Описание: {{ ad.description }}</p>
                 </div>
               </div>
             </div>
@@ -107,12 +114,12 @@
               <label for="categoryOrder">Выберите категорию вашего объявления</label>
               <p>
                 <select id="categoryOrder" class="select" v-model="newAd.category">
-                  <option value="waterTech">Сантехника</option>
-                  <option value="electroTech">Электроника</option>
-                  <option value="scepIT">IT</option>
-                  <option value="household">Бытовая техника</option>
-                  <option value="hire">Услуга по найму</option>
-                  <option value="another">Другое</option>
+                  <option value="Сантехника">Сантехника</option>
+                  <option value="Электроника">Электроника</option>
+                  <option value="IT">IT</option>
+                  <option value="Бытовая техника">Бытовая техника</option>
+                  <option value="Услуга по найму">Услуга по найму</option>
+                  <option value="Другое">Другое</option>
                 </select>
               </p>
               <label for="your-picture">Прикрепите Ваше фото</label>
