@@ -33,163 +33,51 @@
               <button type="button" class="btn custom-btn">Искать</button>
             </p>
           </form>
-          <div class="table-order">
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo2.jpg" class="image-order" width="410" height="410" />
+          <div class="table-order" v-if="ads && ads.length > 0">
+            <div v-for="ad in ads" :key="ad.id" class="order" style="position: relative">
+              <img
+                v-if="ad.photo"
+                :src="ad.photo"
+                class="image-order"
+                width="410"
+                height="410"
+                alt="Фото объявления"
+                style="object-fit: fill; max-width: 100%; max-height: 100%"
+              />
+              <img
+                v-else
+                src="@/assets/images/default.png"
+                class="image-order"
+                width="410"
+                height="410"
+                alt="Фото по умолчанию"
+              />
               <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги сантехника</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
+                <h5 class="text-center" style="margin: 0 auto">{{ ad.title }}</h5>
+                <h6 style="margin-top: 5px; text-align: center">
+                  Город: {{ ad.location || 'Не указан' }}
+                </h6>
                 <div id="text-order">
-                  <p>Тип услуги: Сантехника, Электроника, Лабы недорого</p>
-                  <p>Цена: 500.00 рублей</p>
-                  <p>Дата объявления: 16.03.2025</p>
-                  <p>Статус: Не выполнено</p>
+                  <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
+                  <p>Цена: {{ ad.price }} рублей</p>
+                  <p>Дата объявления: {{ formatDate(ad.createdAt) }}</p>
+                  <p
+                    style="
+                      display: -webkit-box;
+                      -webkit-line-clamp: 4;
+                      -webkit-box-orient: vertical;
+                      overflow: hidden;
+                      word-break: keep-all;
+                    "
+                  >
+                    Описание: {{ ad.description }}
+                  </p>
                 </div>
               </div>
             </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo4.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo5.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo6.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
-            <div class="order" style="position: relative">
-              <img src="@/assets/images/photo3.jpg" class="image-order" width="410" height="410" />
-              <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">Услуги электрика</h5>
-                <p style="margin: 0 0 0 0">Город: Астрахань</p>
-                <div id="text-order">
-                  <p>Тип услуги: да, нет, посмотрим, не знаю</p>
-                  <p>Цена: 50000.00 рублей</p>
-                  <p>Дата объявления: 18.03.2025</p>
-                  <p>Статус: Не выполнено</p>
-                </div>
-              </div>
-            </div>
+          </div>
+          <div class="table-order" v-else>
+            <p>Пока нет объявлений.</p>
           </div>
         </div>
       </div>
@@ -213,14 +101,76 @@ export default {
     Footer,
     User,
   },
+  data() {
+    return {
+      ads: [],
+      error: '',
+      apiBaseUrl: 'http://localhost:8080/api/user',
+      serverBaseUrl: 'http://localhost:8080',
+    }
+  },
   computed: {
     ...mapState(useUserStore, ['user']),
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
+    async fetchAllAds() {
+      const token = localStorage.getItem('jwt')
+      console.log('Токен для объявлений:', token)
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/all-ads`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.ads = await response.json()
+          this.ads = this.ads.map((ad) => ({
+            ...ad,
+            photo: this.checkPhoto(ad.photo, '/images/default.png'),
+          }))
+          console.log('Объявления пользователя:', this.ads)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки объявлений: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    checkPhoto(photoUrl, defaultUrl) {
+      if (!photoUrl || photoUrl.trim() === '' || photoUrl === 'null') {
+        return defaultUrl
+      }
+
+      if (photoUrl.startsWith('/userData/')) {
+        const fullUrl = `${this.serverBaseUrl}${photoUrl}`
+        console.log('Серверный URL фото:', fullUrl)
+        return fullUrl
+      }
+
+      console.log('Локальный URL фото:', photoUrl)
+      return photoUrl
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('ru-RU')
+    },
   },
   mounted() {
     this.fetchUserProfile()
+    this.fetchAllAds()
   },
 }
 </script>

@@ -122,12 +122,10 @@
               alt="Аватар по умолчанию"
               @click="showLightbox(require('@/assets/images/default.png'))"
             />
-            <p class="margin" style="font-size: 25px; font-weight: 500">Город: Астрахань</p>
-            <p style="font-size: 25px">
-              Описание: Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
-              ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient
-              montes, nascetur ridiculus mus.
+            <p class="margin" style="font-size: 25px; font-weight: 500">
+              Город: {{ user.location }}
             </p>
+            <p style="font-size: 25px">Описание: {{ user.description }}</p>
             <h3>Контактная информация:</h3>
             <p style="font-size: 25px">{{ user.phone }}</p>
             <p style="font-size: 25px">{{ user.email }}</p>

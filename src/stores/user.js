@@ -32,6 +32,8 @@ export const useUserStore = defineStore('user', {
             email: this.user.email,
             phone: this.user.phone,
             balance: this.user.balance,
+            description: this.user.description,
+            location: this.user.location,
           }),
         )
         return true

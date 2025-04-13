@@ -37,7 +37,7 @@
                 width="410"
                 height="410"
                 alt="Фото объявления"
-                style="object-fit:fill; max-width: 100%; max-height: 100%;"
+                style="object-fit: fill; max-width: 100%; max-height: 100%"
               />
               <img
                 v-else
@@ -49,17 +49,24 @@
               />
               <div class="order-info">
                 <h5 class="text-center" style="margin: 0 auto">{{ ad.title }}</h5>
-                <h6 style="margin-top: 5px; text-align: center;">Город: {{ ad.location || 'Не указан' }}</h6>
+                <h6 style="margin-top: 5px; text-align: center">
+                  Город: {{ ad.location || 'Не указан' }}
+                </h6>
                 <div id="text-order">
                   <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
                   <p>Цена: {{ ad.price }} рублей</p>
                   <p>Дата объявления: {{ formatDate(ad.createdAt) }}</p>
-                  <p style="display: -webkit-box;
-                  -webkit-line-clamp: 4;
-                  -webkit-box-orient: vertical; 
-                  overflow: hidden;
-                  word-break:keep-all;">
-                  Описание: {{ ad.description }}</p>
+                  <p
+                    style="
+                      display: -webkit-box;
+                      -webkit-line-clamp: 4;
+                      -webkit-box-orient: vertical;
+                      overflow: hidden;
+                      word-break: keep-all;
+                    "
+                  >
+                    Описание: {{ ad.description }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -278,7 +285,7 @@ export default {
           console.log('Новое объявление:', newAd)
           console.log('URL фото:', this.checkPhoto(newAd.photo, '/images/default.png'))
           this.closeDialog()
-          this.resetForm()
+          this.fetchUserAds()
         } else {
           const errorText = await response.text()
           this.error = 'Ошибка создания объявления: ' + response.status + ' - ' + errorText
@@ -328,16 +335,6 @@ export default {
       this.$nextTick(() => {
         this.$forceUpdate()
       })
-    },
-    resetForm() {
-      this.newAd = {
-        title: '',
-        description: '',
-        price: '',
-        category: '',
-        photo: null,
-      }
-      this.previewImage = null
     },
     handleScroll() {
       const btnUp = document.querySelector('.btn-up')
