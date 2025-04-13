@@ -22,7 +22,7 @@
               <input
                 type="text"
                 class="custom-text"
-                placeholder="Поиск"
+                placeholder="Поиск по названию"
                 style="margin-left: 15px"
               />
               <button type="button" class="btn custom-btn">Искать</button>
@@ -48,8 +48,8 @@
                 alt="Фото по умолчанию"
               />
               <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">{{ ad.title }}</h5>
-                <h6 style="margin-top: 5px; text-align: center">
+                <h5 class="text-center">{{ ad.title }}</h5>
+                <h6 style="text-align: center">
                   Город: {{ ad.location || 'Не указан' }}
                 </h6>
                 <div id="text-order">
@@ -60,6 +60,7 @@
                     style="
                       display: -webkit-box;
                       -webkit-line-clamp: 4;
+                      line-clamp: 4;
                       -webkit-box-orient: vertical;
                       overflow: hidden;
                       word-break: keep-all;
