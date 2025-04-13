@@ -195,7 +195,7 @@ data() {
         return
       }
       try {
-        const response = await fetch(`${this.apiBaseUrl}/my-ads`, {
+        const response = await fetch(`${this.apiBaseUrl}/all-ads`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

@@ -102,7 +102,7 @@ input:focus::placeholder {
 
 .order .order-info:hover {
   height: 75%;
-  opacity: 100%;
+  opacity: 100%; 
 }
 /* .order #text-order{
     display: none;
@@ -146,7 +146,6 @@ input:focus::placeholder {
   box-shadow: 0 0 4px rgb(160, 160, 160);
   /* transition: all .1s ease-out;  */
 }
-
 /* .order-info:hover #text-order {
      display: block; 
 }
@@ -161,7 +160,7 @@ input:focus::placeholder {
 } */
 
 .table-order {
-  margin-top: 20px;
+  margin: 20px 20px;
   display: grid; /*сетОЧКА*/
   grid-template-columns: repeat(
     3,

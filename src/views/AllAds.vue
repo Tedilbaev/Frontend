@@ -7,15 +7,21 @@
 
         <div class="col-md-9">
           <h1 class="head">Все объявления:</h1>
-          <label for="city">Введите город поиска</label>
+          <label for="city">Введите город поиска:</label>
           <p>
             <input
               type="text"
               class="custom-text"
-              id="city"
-              name="city"
               placeholder="Например: Астрахань"
+              list="options"
+              v-model="searchQuery"
+              @input="filterCities"
             />
+            <datalist id="options"  v-if="filteredCities.length && searchQuery">
+              <option v-for="city in filteredCities" :key="city.city" @click="selectCity(city.city)">
+                {{ city.city }}
+              </option>
+            </datalist>
           </p>
           <div class="create-line"></div>
           <form style="height: 30px">
@@ -33,7 +39,7 @@
               <button type="button" class="btn custom-btn">Искать</button>
             </p>
           </form>
-          <div class="table-order" v-if="ads && ads.length > 0">
+          <div class="table-order" v-if="ads && ads.length > 0 && !searchQuery">
             <div v-for="ad in ads" :key="ad.id" class="order" style="position: relative">
               <img
                 v-if="ad.photo"
@@ -53,8 +59,8 @@
                 alt="Фото по умолчанию"
               />
               <div class="order-info">
-                <h5 class="text-center" style="margin: 0 auto">{{ ad.title }}</h5>
-                <h6 style="margin-top: 5px; text-align: center">
+                <h5 class="text-center">{{ ad.title }}</h5>
+                <h6 style="text-align: center">
                   Город: {{ ad.location || 'Не указан' }}
                 </h6>
                 <div id="text-order">
@@ -65,6 +71,7 @@
                     style="
                       display: -webkit-box;
                       -webkit-line-clamp: 4;
+                      line-clamp: 4;
                       -webkit-box-orient: vertical;
                       overflow: hidden;
                       word-break: keep-all;
@@ -75,6 +82,52 @@
                 </div>
               </div>
             </div>
+          </div>
+          <div class="table-order" v-else-if="ads && ads.length > 0 && searchQuery">
+            <template v-for="ad in ads" :key="ad.id">
+            <div v-if="ad.location==searchQuery" class="order" style="position: relative">
+              <img
+                v-if="ad.photo"
+                :src="ad.photo"
+                class="image-order"
+                width="410"
+                height="410"
+                alt="Фото объявления"
+                style="object-fit: fill; max-width: 100%; max-height: 100%"
+              />
+              <img
+                v-else
+                src="@/assets/images/default.png"
+                class="image-order"
+                width="410"
+                height="410"
+                alt="Фото по умолчанию"
+              />
+              <div class="order-info">
+                <h5 class="text-center">{{ ad.title }}</h5>
+                <h6 style="text-align: center">
+                  Город: {{ ad.location || 'Не указан' }}
+                </h6>
+                <div id="text-order">
+                  <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
+                  <p>Цена: {{ ad.price }} рублей</p>
+                  <p>Дата объявления: {{ formatDate(ad.createdAt) }}</p>
+                  <p
+                    style="
+                      display: -webkit-box;
+                      -webkit-line-clamp: 4;
+                      line-clamp: 4;
+                      -webkit-box-orient: vertical;
+                      overflow: hidden;
+                      word-break: keep-all;
+                    "
+                  >
+                    Описание: {{ ad.description }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </template>
           </div>
           <div class="table-order" v-else>
             <p>Пока нет объявлений.</p>
@@ -107,6 +160,9 @@ export default {
       error: '',
       apiBaseUrl: 'http://localhost:8080/api/user',
       serverBaseUrl: 'http://localhost:8080',
+      cities: [],
+      searchQuery: '',
+      filteredCities: []
     }
   },
   computed: {
@@ -167,10 +223,36 @@ export default {
       const date = new Date(dateString)
       return date.toLocaleDateString('ru-RU')
     },
+    async fetchCities() {
+      try {
+        const response = await fetch('https://gist.githubusercontent.com/gorborukov/0722a93c35dfba96337b/raw/c07da3ce0a429216dca76f96416e0414b7201817/russia');
+        this.cities = await response.json();
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+      }
+    },
+    filterCities() {
+      if (this.searchQuery) {
+        this.filteredCities = this.cities.filter(city => 
+        city.city.toLowerCase().includes(this.searchQuery.toLowerCase())).slice(0, 5);
+      } else {
+        this.filteredCities = [];
+      }
+    },
+    selectCity(city) {
+      this.searchQuery = city;
+      this.filteredCities = [];
+    }
+  },
+  created() {
+    this.fetchCities()
   },
   mounted() {
     this.fetchUserProfile()
     this.fetchAllAds()
+    
   },
+  
 }
 </script>
+
