@@ -2,59 +2,74 @@
   <Header />
   <main>
     <div class="holder" style="overflow-y: hidden">
-      <dialog class="popup" style="overflow-y: hidden">
+      <dialog class="popup" style="overflow-y: hidden" id="changeAcc">
         <div class="content" style="overflow-y: hidden">
-          <h1 style="text-align: center">Создать объявление</h1>
+          <h1 style="text-align: center">Изменить аккаунт</h1>
           <div class="row">
             <div class="col-md-6">
-              <label for="nameOrder">Введите название объявления</label>
+              <label for="name">Введите новое имя пользователя (До 20 символов): </label>
               <p>
                 <input
                   type="text"
-                  name="nameOrder"
-                  id="nameOrder"
-                  placeholder="Например: Ремонт машин"
+                  name="name"
+                  id="name"
                   class="custom-text"
                   style="width: 100%"
-                  maxlength="50"
+                  maxlength="20"
                 />
               </p>
-              <label for="noteOrder">Введите описание для вашего объявления</label>
+              <label for="city">Введите ваш населенный пункт<sup>*</sup>: </label>
+              <p>
+                <input
+                  class="custom-text"
+                  name="city"
+                  id="city"
+                  wrap="soft"
+                  style="width: 100%"
+                >
+                </ш>
+              </p>
+              <label for="userdescription">Напишите о себе:</label>
               <p>
                 <textarea
                   class="custom-text wrap-text"
-                  name="noteOrder"
-                  id="noteOrder"
+                  name="userdescription"
+                  id="userdescription"
                   rows="14"
                   cols="10"
                   wrap="soft"
                   style="width: 100%"
-                >
-                </textarea>
+                ></textarea>
               </p>
-              <label for="priceOrder">Введите цену на услугу (Цена в рублях)</label>
+              <label for="phone">Введите или измените ваш номер телефона:</label>
               <p>
                 <input
-                  type="text"
-                  name="priceOrder"
-                  id="priceOrder"
-                  placeholder="Например: 2000"
                   class="custom-text"
+                  name="phone"
+                  id="phone"
+                  wrap="soft"
                   style="width: 100%"
-                  maxlength="10"
-                />
+                >
               </p>
-              <label for="categoryOrder">Выберите категорию вашего объявления</label>
+              <label for="email">Введите или измените вашу электронную почту:</label>
               <p>
-                <select id="categoryOrder" class="select" name="Категория">
-                  <option value="waterTech">Сантехника</option>
-                  <option value="electroTech">Электроника</option>
-                  <option value="scepIT">IT</option>
-                  <option value="household">Бытовая техника</option>
-                  <option value="hire">Услуга по найму</option>
-                  <option value="another">Другое</option>
-                </select>
+                <input
+                  class="custom-text"
+                  name="email"
+                  id="email"
+                  wrap="soft"
+                  style="width: 100%"
+                >
               </p>
+            </div>
+            <div class="col-md-6">
+              <div
+                style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 80%; margin-top: 25px"
+              >
+                <div class="preview" id="previewContainer">
+                  <img id="preview" src="#" alt="Предпросмотр" />
+                </div>
+              </div>
               <label for="your-picture">Прикрепите Ваше фото</label>
               <p>
                 <input
@@ -65,34 +80,62 @@
                 />
               </p>
             </div>
-            <div class="col-md-6">
-              <div
-                style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px"
-              >
-                <div class="preview" id="previewContainer">
-                  <img id="preview" src="#" alt="Предпросмотр" />
-                </div>
-              </div>
-            </div>
           </div>
           <div class="text-center" style="align-items: center; justify-content: center">
-            <button type="button" class="btn custom-btn" id="change">Изменить объявление</button>
-            <button type="button" class="btn custom-btn" id="cancel">Отмена</button>
+            <button type="button" class="btn custom-btn" @click="closeDialogAcc">Изменить аккаунт</button> <!--здесь пока закрытие окна-->
+            <button type="button" class="btn custom-btn" @click="closeDialogAcc">Отмена</button>
           </div>
         </div>
       </dialog>
     </div>
     <div class="holder" style="overflow-y: hidden">
-      <dialog class="delpopup" style="overflow-y: hidden" id="deleting">
+      <dialog class="delpopup" style="overflow-y: hidden" id="changePass">
         <div class="content" style="overflow-y: hidden">
-          <h1 style="text-align: center">Удалить объявление</h1>
-          <div class="text-center" style="align-items: center; justify-content: center">
-            <p style="font-size: 25px; text-align: left">
-              Вы уверены, что хотите удалить объявление? После удаления вернуть его будет
-              невозможно!
+          <h3 style="text-align: center">Изменить пароль</h3>
+          <div class="text-center" >
+            <label for="login">Введите ваш логин:</label>
+            <p>
+              <input
+                v-model="email"
+                type="text"
+                id="login"
+                placeholder="Например: ivanivanov@mail.ru"
+                class="custom-text"
+                @click="hideError"
+              />
             </p>
-            <button type="button" class="btn custom-btn" id="delete">Удалить объявление</button>
-            <button type="button" class="btn custom-btn" id="cancel1">Отмена</button>
+            <label for="oldPassword">Введите ваш старый пароль:</label>
+            <p>
+              <input
+                v-model="password"
+                type="oldPassword"
+                id="oldPassword"
+                class="custom-text"
+                @click="hideError"
+              />
+            </p>
+            <label for="newPassword">Введите новый пароль:</label>
+            <p>
+              <input
+                v-model="password"
+                type="newPassword"
+                id="newPassword"
+                class="custom-text"
+                @click="hideError"
+              />
+            </p>
+            <label for="checkPassword">Подтвердите пароль:</label>
+            <p>
+              <input
+                v-model="password"
+                type="checkPassword"
+                id="checkPassword"
+                class="custom-text"
+                @click="hideError"
+              />
+            </p>
+            <button type="button" class="btn custom-btn" @click="closeDialogChangePass">Изменить пароль</button>
+            <button type="button" class="btn custom-btn" @click="closeDialogChangePass">Отмена</button>
           </div>
         </div>
       </dialog>
@@ -123,15 +166,15 @@
               @click="showLightbox(require('@/assets/images/default.png'))"
             />
             <p class="margin" style="font-size: 25px; font-weight: 500">
-              Город: {{ user.location }}
+              Местоположение: {{ user.location }}
             </p>
             <p style="font-size: 25px">Описание: {{ user.description }}</p>
             <h3>Контактная информация:</h3>
             <p style="font-size: 25px">{{ user.phone }}</p>
             <p style="font-size: 25px">{{ user.email }}</p>
             <p>
-              <button type="button" class="btn custom-btn" id="dialogbar">Изменить аккаунт</button>
-              <button type="button" class="btn custom-btn" id="deletebar">Изменить пароль</button>
+              <button type="button" class="btn custom-btn" @click="showDialogAcc">Изменить аккаунт</button>
+              <button type="button" class="btn custom-btn" @click="showDialogPass">Изменить пароль</button>
             </p>
           </div>
           <div v-else>
@@ -180,9 +223,29 @@ export default {
       this.currentImage = imageUrl
       this.lightboxVisible = true
     },
+    showDialogAcc() {
+      document.getElementById('changeAcc').showModal()
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
+    },
+    closeDialogAcc() {
+      document.getElementById('changeAcc').close()
+    },
+    showDialogPass() {
+      document.getElementById('changePass').showModal()
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
+    },
+    closeDialogChangePass() {
+      document.getElementById('changePass').close()
+    },
   },
   mounted() {
     this.fetchUserProfile()
+    
   },
+
 }
 </script>

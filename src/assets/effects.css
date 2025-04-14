@@ -61,6 +61,15 @@
   border-right: 1px solid #2b8025;
 }
 
+div#pppp input.custom-text {
+  margin-top: 5px;
+  width: 74%; 
+}
+
+div#qqqq button.custom-btn {
+  height: 45%; 
+}
+
 .wrap-text {
   height: 150px;
   resize: none;
@@ -270,9 +279,13 @@ input[type='file']::file-selector-button:hover {
   margin: 5px auto 0;
   padding: 6px;
   position: fixed; /*типо высшая позиция над объектами*/
-  width: 40%;
-  height: 30%;
-  top: 30%;
+  width: 30%;
+  height: 45%;
+  top: 25%;
   box-shadow: 0px 5px 10px 2px rgba(34, 60, 80, 0.2);
   z-index: 201;
+}
+
+div.text-center input{
+  width: 100%;
 }

@@ -24,20 +24,27 @@
             </datalist>
           </p>
           <div class="create-line"></div>
-          <form style="height: 30px">
-            <p class="head" style="font-weight: bold">
-              Cортировка:
-              <button type="button" class="btn custom-btn">Без сортировки</button>
-              <button type="button" class="btn custom-btn">А-Я</button>
-              <button type="button" class="btn custom-btn">Я-А</button>
-              <input
+          <form style="height: 70px">
+              <div id="qqqq">
+                <!-- <div > -->
+                  <button type="button" class="btn custom-btn">А-Я</button>
+                  <button type="button" class="btn custom-btn">Сначала новые</button>
+                  <button type="button" class="btn custom-btn">Сначала дешевые</button>
+                <!-- </div> -->
+                <!-- <div> -->
+                  <button type="button" class="btn custom-btn">Я-А</button>
+                  <button type="button" class="btn custom-btn">Сначала старые</button>
+                  <button type="button" class="btn custom-btn">Сначала дорогие</button>
+                <!-- </div> -->
+              </div>
+              <div  id="pppp">
+            <input
                 type="text"
                 class="custom-text"
                 placeholder="Поиск"
-                style="margin-left: 15px"
+                style="margin-left: 10px"
               />
-              <button type="button" class="btn custom-btn">Искать</button>
-            </p>
+            </div>
           </form>
           <div class="table-order" v-if="ads && ads.length > 0 && !searchQuery">
             <div v-for="ad in ads" :key="ad.id" class="order" style="position: relative">
