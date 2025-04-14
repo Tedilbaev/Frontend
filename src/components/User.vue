@@ -2,13 +2,13 @@
   <div v-if="user" class="col-md-3">
     <img
       v-if="user.avatarUrl"
-      :src="user.avatarUrl"
+      :src="checkPhoto(user.avatarUrl)"
       class="image-round margin"
       width="200"
       height="200"
       alt="Аватар"
       @click="showLightbox(user.avatarUrl)"
-      style="cursor: pointer;"
+      style="cursor: pointer"
     />
     <img
       v-else
@@ -101,6 +101,7 @@ export default {
       lightboxVisible: false,
       currentImage: '',
       defaultImage: defaultImage,
+      serverBaseUrl: 'http://localhost:8080',
     }
   },
   name: 'User',
@@ -114,8 +115,17 @@ export default {
       this.$router.push('/login')
     },
     showLightbox(imageUrl) {
-      this.currentImage = imageUrl
+      this.currentImage = this.checkPhoto(imageUrl)
       this.lightboxVisible = true
+    },
+    checkPhoto(photoUrl, defaultUrl = '@/assets/images/default.png') {
+      if (!photoUrl || photoUrl.trim() === '' || photoUrl === 'null') {
+        return defaultUrl
+      }
+      if (photoUrl.startsWith('/userData/')) {
+        return `${this.serverBaseUrl}${photoUrl}`
+      }
+      return photoUrl
     },
   },
 }

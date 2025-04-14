@@ -49,9 +49,7 @@
               />
               <div class="order-info">
                 <h5 class="text-center">{{ ad.title }}</h5>
-                <h6 style="text-align: center">
-                  Город: {{ ad.location || 'Не указан' }}
-                </h6>
+                <h6 style="text-align: center">Город: {{ ad.location || 'Не указан' }}</h6>
                 <div id="text-order">
                   <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
                   <p>Цена: {{ ad.price }} рублей</p>
@@ -197,7 +195,7 @@ export default {
     return {
       ads: [],
       error: '',
-      apiBaseUrl: 'http://localhost:8080/api/user',
+      apiBaseUrl: 'http://localhost:8080/api/ads',
       serverBaseUrl: 'http://localhost:8080',
       newAd: {
         title: '',
@@ -211,7 +209,7 @@ export default {
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchUserAds() {
+    async fetchUserAds(sortBy, order) {
       const token = localStorage.getItem('jwt')
       console.log('Токен для объявлений:', token)
       if (!token) {
@@ -220,7 +218,7 @@ export default {
         return
       }
       try {
-        const response = await fetch(`${this.apiBaseUrl}/my-ads`, {
+        const response = await fetch(`${this.apiBaseUrl}/my?sortBy=${sortBy}&order=${order}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -268,7 +266,7 @@ export default {
       }
 
       try {
-        const response = await fetch(`${this.apiBaseUrl}/create-ad`, {
+        const response = await fetch(`${this.apiBaseUrl}/create`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -286,7 +284,7 @@ export default {
           console.log('Новое объявление:', newAd)
           console.log('URL фото:', this.checkPhoto(newAd.photo, '/images/default.png'))
           this.closeDialog()
-          this.fetchUserAds()
+          this.fetchUserAds('createdAt', 'desc')
         } else {
           const errorText = await response.text()
           this.error = 'Ошибка создания объявления: ' + response.status + ' - ' + errorText
@@ -354,7 +352,7 @@ export default {
   },
   mounted() {
     this.fetchUserProfile()
-    this.fetchUserAds()
+    this.fetchUserAds('createdAt', 'desc')
     window.addEventListener('scroll', this.handleScroll)
     const btnUp = document.querySelector('.btn-up')
     if (btnUp) {

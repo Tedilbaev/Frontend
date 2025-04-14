@@ -7,33 +7,31 @@
           <h1 style="text-align: center">Изменить аккаунт</h1>
           <div class="row">
             <div class="col-md-6">
-              <label for="name">Введите новое имя пользователя (До 20 символов): </label>
+              <label for="name">Введите новое имя пользователя (до 20 символов):</label>
               <p>
                 <input
+                  v-model="profile.username"
                   type="text"
-                  name="name"
                   id="name"
                   class="custom-text"
                   style="width: 100%"
                   maxlength="20"
                 />
               </p>
-              <label for="city">Введите ваш населенный пункт<sup>*</sup>: </label>
+              <label for="city">Введите ваш населенный пункт:</label>
               <p>
                 <input
+                  v-model="profile.location"
                   class="custom-text"
-                  name="city"
                   id="city"
-                  wrap="soft"
                   style="width: 100%"
-                >
-                </ш>
+                />
               </p>
               <label for="userdescription">Напишите о себе:</label>
               <p>
                 <textarea
+                  v-model="profile.description"
                   class="custom-text wrap-text"
-                  name="userdescription"
                   id="userdescription"
                   rows="14"
                   cols="10"
@@ -43,48 +41,50 @@
               </p>
               <label for="phone">Введите или измените ваш номер телефона:</label>
               <p>
-                <input
-                  class="custom-text"
-                  name="phone"
-                  id="phone"
-                  wrap="soft"
-                  style="width: 100%"
-                >
+                <input v-model="profile.phone" class="custom-text" id="phone" style="width: 100%" />
               </p>
               <label for="email">Введите или измените вашу электронную почту:</label>
               <p>
-                <input
-                  class="custom-text"
-                  name="email"
-                  id="email"
-                  wrap="soft"
-                  style="width: 100%"
-                >
+                <input v-model="profile.email" class="custom-text" id="email" style="width: 100%" />
               </p>
             </div>
             <div class="col-md-6">
               <div
-                style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 80%; margin-top: 25px"
+                style="
+                  width: 100%;
+                  border-radius: 10px;
+                  border: 1px solid #2b8025;
+                  height: 450px;
+                  margin-top: 25px;
+                "
               >
                 <div class="preview" id="previewContainer">
-                  <img id="preview" src="#" alt="Предпросмотр" />
+                  <img
+                    :src="previewImage || '/images/default.png'"
+                    id="preview"
+                    alt="Предпросмотр"
+                    style="max-width: 100%; max-height: 100%; object-fit: contain"
+                  />
                 </div>
               </div>
-              <label for="your-picture">Прикрепите Ваше фото</label>
+              <label for="your-picture">Прикрепите ваше фото</label>
               <p>
                 <input
                   type="file"
                   id="your-picture"
-                  name="your-picture"
                   accept=".jpg, .jpeg, .png"
+                  @change="handleFileChange"
                 />
               </p>
             </div>
           </div>
-          <div class="text-center" style="align-items: center; justify-content: center">
-            <button type="button" class="btn custom-btn" @click="closeDialogAcc">Изменить аккаунт</button> <!--здесь пока закрытие окна-->
+          <div class="text-center">
+            <button type="button" class="btn custom-btn" @click="updateProfile">
+              Изменить аккаунт
+            </button>
             <button type="button" class="btn custom-btn" @click="closeDialogAcc">Отмена</button>
           </div>
+          <p v-if="error" style="color: red; text-align: center">{{ error }}</p>
         </div>
       </dialog>
     </div>
@@ -92,51 +92,42 @@
       <dialog class="delpopup" style="overflow-y: hidden" id="changePass">
         <div class="content" style="overflow-y: hidden">
           <h3 style="text-align: center">Изменить пароль</h3>
-          <div class="text-center" >
-            <label for="login">Введите ваш логин:</label>
-            <p>
-              <input
-                v-model="email"
-                type="text"
-                id="login"
-                placeholder="Например: ivanivanov@mail.ru"
-                class="custom-text"
-                @click="hideError"
-              />
-            </p>
+          <div class="text-center">
             <label for="oldPassword">Введите ваш старый пароль:</label>
             <p>
               <input
-                v-model="password"
-                type="oldPassword"
+                v-model="password.oldPassword"
+                type="password"
                 id="oldPassword"
                 class="custom-text"
-                @click="hideError"
               />
             </p>
             <label for="newPassword">Введите новый пароль:</label>
             <p>
               <input
-                v-model="password"
-                type="newPassword"
+                v-model="password.newPassword"
+                type="password"
                 id="newPassword"
                 class="custom-text"
-                @click="hideError"
               />
             </p>
             <label for="checkPassword">Подтвердите пароль:</label>
             <p>
               <input
-                v-model="password"
-                type="checkPassword"
+                v-model="password.confirmPassword"
+                type="password"
                 id="checkPassword"
                 class="custom-text"
-                @click="hideError"
               />
             </p>
-            <button type="button" class="btn custom-btn" @click="closeDialogChangePass">Изменить пароль</button>
-            <button type="button" class="btn custom-btn" @click="closeDialogChangePass">Отмена</button>
+            <button type="button" class="btn custom-btn" @click="changePassword">
+              Изменить пароль
+            </button>
+            <button type="button" class="btn custom-btn" @click="closeDialogChangePass">
+              Отмена
+            </button>
           </div>
+          <p v-if="error" style="color: red; text-align: center">{{ error }}</p>
         </div>
       </dialog>
     </div>
@@ -149,7 +140,7 @@
             <h3 class="head">{{ user.username }}</h3>
             <img
               v-if="user.avatarUrl"
-              :src="user.avatarUrl"
+              :src="checkPhoto(user.avatarUrl)"
               class="image-round margin"
               width="200"
               height="200"
@@ -163,18 +154,22 @@
               width="200"
               height="200"
               alt="Аватар по умолчанию"
-              @click="showLightbox(require('@/assets/images/default.png'))"
+              @click="showLightbox('@/assets/images/default.png')"
             />
             <p class="margin" style="font-size: 25px; font-weight: 500">
-              Местоположение: {{ user.location }}
+              Местоположение: {{ user.location || 'Не указано' }}
             </p>
-            <p style="font-size: 25px">Описание: {{ user.description }}</p>
+            <p style="font-size: 25px">Описание: {{ user.description || 'Не указано' }}</p>
             <h3>Контактная информация:</h3>
-            <p style="font-size: 25px">{{ user.phone }}</p>
+            <p style="font-size: 25px">{{ user.phone || 'Не указан' }}</p>
             <p style="font-size: 25px">{{ user.email }}</p>
             <p>
-              <button type="button" class="btn custom-btn" @click="showDialogAcc">Изменить аккаунт</button>
-              <button type="button" class="btn custom-btn" @click="showDialogPass">Изменить пароль</button>
+              <button type="button" class="btn custom-btn" @click="showDialogAcc">
+                Изменить аккаунт
+              </button>
+              <button type="button" class="btn custom-btn" @click="showDialogPass">
+                Изменить пароль
+              </button>
             </p>
           </div>
           <div v-else>
@@ -202,17 +197,34 @@ import { mapActions, mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 
 export default {
-  data() {
-    return {
-      lightboxVisible: false,
-      currentImage: '',
-    }
-  },
   name: 'Account',
   components: {
     Header,
     Footer,
     User,
+  },
+  data() {
+    return {
+      lightboxVisible: false,
+      currentImage: '',
+      profile: {
+        username: '',
+        email: '',
+        location: '',
+        description: '',
+        phone: '',
+        avatar: null,
+      },
+      password: {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      },
+      previewImage: null,
+      error: '',
+      apiBaseUrl: 'http://localhost:8080/api/user',
+      serverBaseUrl: 'http://localhost:8080',
+    }
   },
   computed: {
     ...mapState(useUserStore, ['user']),
@@ -220,32 +232,169 @@ export default {
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
     showLightbox(imageUrl) {
-      this.currentImage = imageUrl
+      this.currentImage = this.checkPhoto(imageUrl)
       this.lightboxVisible = true
     },
+    checkPhoto(photoUrl, defaultUrl = '@/assets/images/default.png') {
+      if (!photoUrl || photoUrl.trim() === '' || photoUrl === 'null') {
+        return defaultUrl
+      }
+      if (photoUrl.startsWith('/userData/')) {
+        return `${this.serverBaseUrl}${photoUrl}`
+      }
+      return photoUrl
+    },
     showDialogAcc() {
+      this.profile = {
+        username: this.user?.username || '',
+        email: this.user?.email || '',
+        location: this.user?.location || '',
+        description: this.user?.description || '',
+        phone: this.user?.phone || '',
+        avatar: null,
+      }
+      this.previewImage = this.checkPhoto(this.user?.avatarUrl)
       document.getElementById('changeAcc').showModal()
       this.$nextTick(() => {
         this.$forceUpdate()
       })
     },
     closeDialogAcc() {
+      this.error = ''
+      this.previewImage = null
       document.getElementById('changeAcc').close()
     },
     showDialogPass() {
+      this.password = {
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      }
+      this.error = ''
       document.getElementById('changePass').showModal()
       this.$nextTick(() => {
         this.$forceUpdate()
       })
     },
     closeDialogChangePass() {
+      this.error = ''
       document.getElementById('changePass').close()
+    },
+    handleFileChange(e) {
+      const file = e.target.files[0]
+      if (file) {
+        this.profile.avatar = file
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          this.previewImage = event.target.result
+        }
+        reader.readAsDataURL(file)
+      } else {
+        this.previewImage = null
+      }
+    },
+    async updateProfile() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+
+      const formData = new FormData()
+      if (this.profile.username) formData.append('username', this.profile.username)
+      if (this.profile.email) formData.append('email', this.profile.email)
+      if (this.profile.location) formData.append('location', this.profile.location)
+      if (this.profile.description) formData.append('description', this.profile.description)
+      if (this.profile.phone) formData.append('phone', this.profile.phone)
+      if (this.profile.avatar) {
+        formData.append('avatar', this.profile.avatar)
+      }
+
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/update`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+
+        if (response.ok) {
+          await this.fetchUserProfile()
+          this.closeDialogAcc()
+        } else {
+          const errorText = await response.text()
+          this.error = `Ошибка обновления профиля: ${errorText}`
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при обновлении профиля'
+        console.error('Исключение:', e)
+      }
+    },
+    async changePassword() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+
+      if (this.password.newPassword !== this.password.confirmPassword) {
+        this.error = 'Пароли не совпадают'
+        return
+      }
+      const formData = new FormData()
+      formData.append('oldPassword', this.password.oldPassword)
+      formData.append('newPassword', this.password.newPassword)
+      formData.append('confirmPassword', this.password.confirmPassword)
+
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/password`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+
+        if (response.ok) {
+          this.closeDialogChangePass()
+        } else {
+          const errorText = await response.text()
+          this.error = `Ошибка смены пароля: ${errorText}`
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при смене пароля'
+        console.error('Исключение:', e)
+      }
     },
   },
   mounted() {
     this.fetchUserProfile()
-    
   },
-
 }
 </script>
+
+<style scoped>
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+.popup {
+  height: 75%;
+}
+.preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#preview {
+  max-width: 100%;
+  max-height: 450px;
+  object-fit: contain;
+}
+</style>

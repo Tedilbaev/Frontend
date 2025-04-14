@@ -63,11 +63,11 @@
 
 div#pppp input.custom-text {
   margin-top: 5px;
-  width: 74%; 
+  width: 74%;
 }
 
 div#qqqq button.custom-btn {
-  height: 45%; 
+  height: 45%;
 }
 
 .wrap-text {
@@ -111,7 +111,7 @@ input:focus::placeholder {
 
 .order .order-info:hover {
   height: 75%;
-  opacity: 100%; 
+  opacity: 100%;
 }
 /* .order #text-order{
     display: none;
@@ -280,12 +280,12 @@ input[type='file']::file-selector-button:hover {
   padding: 6px;
   position: fixed; /*типо высшая позиция над объектами*/
   width: 30%;
-  height: 45%;
+  height: 40%;
   top: 25%;
   box-shadow: 0px 5px 10px 2px rgba(34, 60, 80, 0.2);
   z-index: 201;
 }
 
-div.text-center input{
+div.text-center input {
   width: 100%;
 }

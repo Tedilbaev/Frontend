@@ -17,28 +17,48 @@
               v-model="searchQuery"
               @input="filterCities"
             />
-            <datalist id="options"  v-if="filteredCities.length && searchQuery">
-              <option v-for="city in filteredCities" :key="city.city" @click="selectCity(city.city)">
+            <datalist id="options" v-if="filteredCities.length && searchQuery">
+              <option
+                v-for="city in filteredCities"
+                :key="city.city"
+                @click="selectCity(city.city)"
+              >
                 {{ city.city }}
               </option>
             </datalist>
           </p>
           <div class="create-line"></div>
           <form style="height: 70px">
-              <div id="qqqq">
-                <!-- <div > -->
-                  <button type="button" class="btn custom-btn">А-Я</button>
-                  <button type="button" class="btn custom-btn">Сначала новые</button>
-                  <button type="button" class="btn custom-btn">Сначала дешевые</button>
-                <!-- </div> -->
-                <!-- <div> -->
-                  <button type="button" class="btn custom-btn">Я-А</button>
-                  <button type="button" class="btn custom-btn">Сначала старые</button>
-                  <button type="button" class="btn custom-btn">Сначала дорогие</button>
-                <!-- </div> -->
-              </div>
-              <div  id="pppp">
-            <input
+            <div id="qqqq">
+              <!-- <div > -->
+              <button type="button" class="btn custom-btn" @click="fetchAllAds('title', 'asc')">
+                А-Я
+              </button>
+              <button
+                type="button"
+                class="btn custom-btn"
+                @click="fetchAllAds('createdAt', 'desc')"
+              >
+                Сначала новые
+              </button>
+              <button type="button" class="btn custom-btn" @click="fetchAllAds('price', 'asc')">
+                Сначала дешевые
+              </button>
+              <!-- </div> -->
+              <!-- <div> -->
+              <button type="button" class="btn custom-btn" @click="fetchAllAds('title', 'desc')">
+                Я-А
+              </button>
+              <button type="button" class="btn custom-btn" @click="fetchAllAds('createdAt', 'asc')">
+                Сначала старые
+              </button>
+              <button type="button" class="btn custom-btn" @click="fetchAllAds('price', 'desc')">
+                Сначала дорогие
+              </button>
+              <!-- </div> -->
+            </div>
+            <div id="pppp">
+              <input
                 type="text"
                 class="custom-text"
                 placeholder="Поиск"
@@ -67,9 +87,7 @@
               />
               <div class="order-info">
                 <h5 class="text-center">{{ ad.title }}</h5>
-                <h6 style="text-align: center">
-                  Город: {{ ad.location || 'Не указан' }}
-                </h6>
+                <h6 style="text-align: center">Город: {{ ad.location || 'Не указан' }}</h6>
                 <div id="text-order">
                   <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
                   <p>Цена: {{ ad.price }} рублей</p>
@@ -92,49 +110,47 @@
           </div>
           <div class="table-order" v-else-if="ads && ads.length > 0 && searchQuery">
             <template v-for="ad in ads" :key="ad.id">
-            <div v-if="ad.location==searchQuery" class="order" style="position: relative">
-              <img
-                v-if="ad.photo"
-                :src="ad.photo"
-                class="image-order"
-                width="410"
-                height="410"
-                alt="Фото объявления"
-                style="object-fit: fill; max-width: 100%; max-height: 100%"
-              />
-              <img
-                v-else
-                src="@/assets/images/default.png"
-                class="image-order"
-                width="410"
-                height="410"
-                alt="Фото по умолчанию"
-              />
-              <div class="order-info">
-                <h5 class="text-center">{{ ad.title }}</h5>
-                <h6 style="text-align: center">
-                  Город: {{ ad.location || 'Не указан' }}
-                </h6>
-                <div id="text-order">
-                  <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
-                  <p>Цена: {{ ad.price }} рублей</p>
-                  <p>Дата объявления: {{ formatDate(ad.createdAt) }}</p>
-                  <p
-                    style="
-                      display: -webkit-box;
-                      -webkit-line-clamp: 4;
-                      line-clamp: 4;
-                      -webkit-box-orient: vertical;
-                      overflow: hidden;
-                      word-break: keep-all;
-                    "
-                  >
-                    Описание: {{ ad.description }}
-                  </p>
+              <div v-if="ad.location == searchQuery" class="order" style="position: relative">
+                <img
+                  v-if="ad.photo"
+                  :src="ad.photo"
+                  class="image-order"
+                  width="410"
+                  height="410"
+                  alt="Фото объявления"
+                  style="object-fit: fill; max-width: 100%; max-height: 100%"
+                />
+                <img
+                  v-else
+                  src="@/assets/images/default.png"
+                  class="image-order"
+                  width="410"
+                  height="410"
+                  alt="Фото по умолчанию"
+                />
+                <div class="order-info">
+                  <h5 class="text-center">{{ ad.title }}</h5>
+                  <h6 style="text-align: center">Город: {{ ad.location || 'Не указан' }}</h6>
+                  <div id="text-order">
+                    <p>Тип услуги: {{ ad.category || 'Не указана' }}</p>
+                    <p>Цена: {{ ad.price }} рублей</p>
+                    <p>Дата объявления: {{ formatDate(ad.createdAt) }}</p>
+                    <p
+                      style="
+                        display: -webkit-box;
+                        -webkit-line-clamp: 4;
+                        line-clamp: 4;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                        word-break: keep-all;
+                      "
+                    >
+                      Описание: {{ ad.description }}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </template>
+            </template>
           </div>
           <div class="table-order" v-else>
             <p>Пока нет объявлений.</p>
@@ -165,11 +181,11 @@ export default {
     return {
       ads: [],
       error: '',
-      apiBaseUrl: 'http://localhost:8080/api/user',
+      apiBaseUrl: 'http://localhost:8080/api/ads',
       serverBaseUrl: 'http://localhost:8080',
       cities: [],
       searchQuery: '',
-      filteredCities: []
+      filteredCities: [],
     }
   },
   computed: {
@@ -177,7 +193,7 @@ export default {
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchAllAds() {
+    async fetchAllAds(sortBy, order) {
       const token = localStorage.getItem('jwt')
       console.log('Токен для объявлений:', token)
       if (!token) {
@@ -186,7 +202,7 @@ export default {
         return
       }
       try {
-        const response = await fetch(`${this.apiBaseUrl}/all-ads`, {
+        const response = await fetch(`${this.apiBaseUrl}/all?sortBy=${sortBy}&order=${order}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -232,34 +248,34 @@ export default {
     },
     async fetchCities() {
       try {
-        const response = await fetch('https://gist.githubusercontent.com/gorborukov/0722a93c35dfba96337b/raw/c07da3ce0a429216dca76f96416e0414b7201817/russia');
-        this.cities = await response.json();
+        const response = await fetch(
+          'https://gist.githubusercontent.com/gorborukov/0722a93c35dfba96337b/raw/c07da3ce0a429216dca76f96416e0414b7201817/russia',
+        )
+        this.cities = await response.json()
       } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
+        console.error('Ошибка загрузки данных:', error)
       }
     },
     filterCities() {
       if (this.searchQuery) {
-        this.filteredCities = this.cities.filter(city => 
-        city.city.toLowerCase().includes(this.searchQuery.toLowerCase())).slice(0, 5);
+        this.filteredCities = this.cities
+          .filter((city) => city.city.toLowerCase().includes(this.searchQuery.toLowerCase()))
+          .slice(0, 5)
       } else {
-        this.filteredCities = [];
+        this.filteredCities = []
       }
     },
     selectCity(city) {
-      this.searchQuery = city;
-      this.filteredCities = [];
-    }
+      this.searchQuery = city
+      this.filteredCities = []
+    },
   },
   created() {
     this.fetchCities()
   },
   mounted() {
     this.fetchUserProfile()
-    this.fetchAllAds()
-    
+    this.fetchAllAds('createdAt', 'desc')
   },
-  
 }
 </script>
-

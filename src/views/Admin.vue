@@ -180,13 +180,13 @@ data() {
     return {
       ads: [],
       error: '',
-      apiBaseUrl: 'http://localhost:8080/api/user',
+      apiBaseUrl: 'http://localhost:8080/api/ads',
       serverBaseUrl: 'http://localhost:8080',
     }
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchUserAds() {
+    async fetchUserAds(sortBy, order) {
       const token = localStorage.getItem('jwt')
       console.log('Токен для объявлений:', token)
       if (!token) {
@@ -195,7 +195,7 @@ data() {
         return
       }
       try {
-        const response = await fetch(`${this.apiBaseUrl}/all-ads`, {
+        const response = await fetch(`${this.apiBaseUrl}/all?sortBy=${sortBy}&order=${order}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ data() {
   },
   mounted() {
     // this.fetchUserProfile()
-    this.fetchUserAds()
+    this.fetchUserAds("createdAt", "desc")
   }
 }
 </script>
