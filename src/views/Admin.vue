@@ -84,8 +84,8 @@
       <div class="row" style="display: flex; justify-content: center;">
         <div class="col-md-5">
           <h1 class="head">Все объявления:</h1>
-          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу">
-          <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;">
+          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу" v-model="searchQuery" @input="search">
+          <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;" v-model="searchType">
             <option value="name" selected="selected">Название</option>
             <option value="type">Тип услуги</option>
           </select>
@@ -182,11 +182,13 @@ data() {
       error: '',
       apiBaseUrl: 'http://localhost:8080/api/ads',
       serverBaseUrl: 'http://localhost:8080',
+      searchQuery: '',
+      searchType: 'name',
     }
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchUserAds(sortBy, order) {
+    async fetchAllAds(sortBy = 'createdAt', order = 'desc', query = '', type = this.searchType) {
       const token = localStorage.getItem('jwt')
       console.log('Токен для объявлений:', token)
       if (!token) {
@@ -195,7 +197,16 @@ data() {
         return
       }
       try {
-        const response = await fetch(`${this.apiBaseUrl}/all?sortBy=${sortBy}&order=${order}`, {
+        const url = new URL(`${this.apiBaseUrl}/all`)
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (query && type === 'name') {
+          url.searchParams.append('title', query)
+        } else if (query && type === 'type') {
+          url.searchParams.append('category', query)
+        }
+
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -204,11 +215,10 @@ data() {
         })
         if (response.ok) {
           this.ads = await response.json()
-          console.log(this.ads)
           this.ads = this.ads.map((ad) => ({
-            ...ad
+            ...ad,
+            photo: this.checkPhoto(ad.photo),
           }))
-          console.log('Объявления пользователя:', this.ads)
         } else if (response.status === 401 || response.status === 403) {
           this.error = 'Сессия истекла или доступ запрещен'
           localStorage.removeItem('jwt')
@@ -234,10 +244,13 @@ data() {
     closeDialog() {
       document.querySelector('dialog').close()
     },
+    search() {
+      this.fetchAllAds('createdAt', 'asc', this.searchQuery, this.searchType)
+    },
   },
   mounted() {
     // this.fetchUserProfile()
-    this.fetchUserAds("createdAt", "desc")
+    this.fetchAllAds("createdAt", "asc")
   }
 }
 </script>

@@ -13,26 +13,61 @@
             </button>
           </p>
           <div class="create-line"></div>
-          <div style="height: 30px">
-            <p class="head" style="font-weight: bold">
-              Сортировка:
-              <button type="button" class="btn custom-btn">Все</button>
-              <button type="button" class="btn custom-btn">А-Я</button>
-              <button type="button" class="btn custom-btn">Я-А</button>
+          <form style="height: 70px">
+            <div id="qqqq">
+              <!-- <div > -->
+              <button type="button" class="btn custom-btn" @click="fetchUserAds('title', 'asc')">
+                А-Я
+              </button>
+              <button
+                type="button"
+                class="btn custom-btn"
+                @click="fetchUserAds('createdAt', 'desc')"
+              >
+                Сначала новые
+              </button>
+              <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'asc')">
+                Сначала дешевые
+              </button>
+              <!-- </div> -->
+              <!-- <div> -->
+              <button type="button" class="btn custom-btn" @click="fetchUserAds('title', 'desc')">
+                Я-А
+              </button>
+              <button
+                type="button"
+                class="btn custom-btn"
+                @click="fetchUserAds('createdAt', 'asc')"
+              >
+                Сначала старые
+              </button>
+              <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'desc')">
+                Сначала дорогие
+              </button>
+              <!-- </div> -->
+            </div>
+            <div id="pppp">
               <input
                 type="text"
                 class="custom-text"
-                placeholder="Поиск по названию"
-                style="margin-left: 15px"
+                placeholder="Поиск"
+                style="margin-left: 10px"
+                v-model="searchTitle"
+                @input="searchByTitle"
               />
-              <button type="button" class="btn custom-btn">Искать</button>
-            </p>
-          </div>
+            </div>
+          </form>
           <div class="table-order" v-if="ads && ads.length > 0">
-            <div v-for="ad in ads" :key="ad.id" class="order" style="position: relative">
+            <div
+              v-for="ad in ads"
+              :key="ad.id"
+              class="order"
+              style="position: relative"
+              @click="goToAd(ad.id)"
+            >
               <img
                 v-if="ad.photo"
-                :src="ad.photo"
+                :src="checkPhoto(ad.photo)"
                 class="image-order"
                 width="410"
                 height="410"
@@ -183,6 +218,7 @@ import { useUserStore } from '@/stores/user'
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
 import User from '@/components/User.vue'
+import defaultImage from '@/assets/images/default.png'
 
 export default {
   name: 'MyAds',
@@ -205,20 +241,27 @@ export default {
         photo: null,
       },
       previewImage: null,
+      defaultImage,
+      searchTitle: '',
     }
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchUserAds(sortBy, order) {
+    async fetchUserAds(sortBy = 'createdAt', order = 'desc', title = this.searchTitle) {
       const token = localStorage.getItem('jwt')
-      console.log('Токен для объявлений:', token)
       if (!token) {
         this.error = 'Вы не авторизованы'
         this.$router.push('/login')
         return
       }
       try {
-        const response = await fetch(`${this.apiBaseUrl}/my?sortBy=${sortBy}&order=${order}`, {
+        const url = new URL(`${this.apiBaseUrl}/my`)
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (title) {
+          url.searchParams.append('title', title)
+        }
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -229,9 +272,8 @@ export default {
           this.ads = await response.json()
           this.ads = this.ads.map((ad) => ({
             ...ad,
-            photo: this.checkPhoto(ad.photo, '/images/default.png'),
+            photo: this.checkPhoto(ad.photo),
           }))
-          console.log('Объявления пользователя:', this.ads)
         } else if (response.status === 401 || response.status === 403) {
           this.error = 'Сессия истекла или доступ запрещен'
           localStorage.removeItem('jwt')
@@ -243,6 +285,9 @@ export default {
         this.error = 'Ошибка сервера'
         console.error('Исключение:', e)
       }
+    },
+    searchByTitle() {
+      this.fetchUserAds('createdAt', 'desc', this.searchTitle)
     },
     async createAd() {
       const token = localStorage.getItem('jwt')
@@ -260,11 +305,7 @@ export default {
       formData.append('location', 'Астрахань')
       if (this.newAd.photo) {
         formData.append('photo', this.newAd.photo)
-        console.log('Выбран файл:', this.newAd.photo.name)
-      } else {
-        console.log('Файл не выбран')
       }
-
       try {
         const response = await fetch(`${this.apiBaseUrl}/create`, {
           method: 'POST',
@@ -279,10 +320,10 @@ export default {
           const newAd = await response.json()
           this.ads.push({
             ...newAd,
-            photo: this.checkPhoto(newAd.photo, '/images/default.png'),
+            photo: this.checkPhoto(newAd.photo),
           })
           console.log('Новое объявление:', newAd)
-          console.log('URL фото:', this.checkPhoto(newAd.photo, '/images/default.png'))
+          console.log('URL фото:', this.checkPhoto(newAd.photo))
           this.closeDialog()
           this.fetchUserAds('createdAt', 'desc')
         } else {
@@ -295,18 +336,14 @@ export default {
         console.error('Исключение:', e)
       }
     },
-    checkPhoto(photoUrl, defaultUrl) {
+    checkPhoto(photoUrl) {
       if (!photoUrl || photoUrl.trim() === '' || photoUrl === 'null') {
-        return defaultUrl
+        return this.defaultImage
       }
-
       if (photoUrl.startsWith('/userData/')) {
         const fullUrl = `${this.serverBaseUrl}${photoUrl}`
-        console.log('Серверный URL фото:', fullUrl)
         return fullUrl
       }
-
-      console.log('Локальный URL фото:', photoUrl)
       return photoUrl
     },
     closeDialog() {
@@ -348,6 +385,9 @@ export default {
         top: 0,
         behavior: 'smooth',
       })
+    },
+    goToAd(adId) {
+      this.$router.push({ name: 'MyAdInfo', params: { id: adId } })
     },
   },
   mounted() {

@@ -63,11 +63,19 @@
                 class="custom-text"
                 placeholder="Поиск"
                 style="margin-left: 10px"
+                v-model="searchTitle"
+                @input="searchByTitle"
               />
             </div>
           </form>
           <div class="table-order" v-if="ads && ads.length > 0 && !searchQuery">
-            <div v-for="ad in ads" :key="ad.id" class="order" style="position: relative">
+            <div
+              v-for="ad in ads"
+              :key="ad.id"
+              class="order"
+              style="position: relative"
+              @click="goToAd(ad.id)"
+            >
               <img
                 v-if="ad.photo"
                 :src="ad.photo"
@@ -110,7 +118,12 @@
           </div>
           <div class="table-order" v-else-if="ads && ads.length > 0 && searchQuery">
             <template v-for="ad in ads" :key="ad.id">
-              <div v-if="ad.location == searchQuery" class="order" style="position: relative">
+              <div
+                v-if="ad.location == searchQuery"
+                class="order"
+                style="position: relative"
+                @click="goToAd(ad.id)"
+              >
                 <img
                   v-if="ad.photo"
                   :src="ad.photo"
@@ -169,6 +182,7 @@ import Footer from '@/components/Footer.vue'
 import User from '@/components/User.vue'
 import { mapActions, mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
+import defaultImage from '@/assets/images/default.png'
 
 export default {
   name: 'AllAds',
@@ -186,6 +200,8 @@ export default {
       cities: [],
       searchQuery: '',
       filteredCities: [],
+      defaultImage,
+      searchTitle: '',
     }
   },
   computed: {
@@ -193,7 +209,7 @@ export default {
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchAllAds(sortBy, order) {
+    async fetchAllAds(sortBy = 'createdAt', order = 'desc', title = this.searchTitle) {
       const token = localStorage.getItem('jwt')
       console.log('Токен для объявлений:', token)
       if (!token) {
@@ -202,7 +218,14 @@ export default {
         return
       }
       try {
-        const response = await fetch(`${this.apiBaseUrl}/all?sortBy=${sortBy}&order=${order}`, {
+        const url = new URL(`${this.apiBaseUrl}/all`)
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (title) {
+          url.searchParams.append('title', title)
+        }
+
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -213,9 +236,9 @@ export default {
           this.ads = await response.json()
           this.ads = this.ads.map((ad) => ({
             ...ad,
-            photo: this.checkPhoto(ad.photo, '/images/default.png'),
+            photo: this.checkPhoto(ad.photo),
           }))
-          console.log('Объявления пользователя:', this.ads)
+          console.log('Объявления:', this.ads)
         } else if (response.status === 401 || response.status === 403) {
           this.error = 'Сессия истекла или доступ запрещен'
           localStorage.removeItem('jwt')
@@ -228,9 +251,9 @@ export default {
         console.error('Исключение:', e)
       }
     },
-    checkPhoto(photoUrl, defaultUrl) {
+    checkPhoto(photoUrl) {
       if (!photoUrl || photoUrl.trim() === '' || photoUrl === 'null') {
-        return defaultUrl
+        return this.defaultImage
       }
 
       if (photoUrl.startsWith('/userData/')) {
@@ -268,6 +291,12 @@ export default {
     selectCity(city) {
       this.searchQuery = city
       this.filteredCities = []
+    },
+    goToAd(adId) {
+      this.$router.push({ name: 'AdInfo', params: { id: adId } })
+    },
+    searchByTitle() {
+      this.fetchAllAds('createdAt', 'desc', this.searchTitle)
     },
   },
   created() {

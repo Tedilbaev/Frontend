@@ -101,6 +101,7 @@
         <div class="col-md-9">
           <h1 class="head">Кошелек:</h1>
           <h2 v-if="user.balance" class="head">{{ user.balance }} &#8381;</h2>
+          <h2 v-else class="head">0 &#8381;</h2>
           <p>
             <button type="button" class="btn custom-btn" id="earn">Пополнить счет</button>
             <button type="button" class="btn custom-btn" id="spend">Снять с счета</button>

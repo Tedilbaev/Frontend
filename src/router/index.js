@@ -7,6 +7,8 @@ import Account from '@/views/Account.vue'
 import Wallet from '@/views/Wallet.vue'
 import MyAds from '@/views/MyAds.vue'
 import AllAds from '@/views/AllAds.vue'
+import AdInfo from '@/views/AdInfo.vue'
+import MyAdInfo from '@/views/MyAdInfo.vue'
 
 const routes = [
   {
@@ -52,6 +54,18 @@ const routes = [
     path: '/allads',
     name: 'AllAds',
     component: AllAds,
+  },
+  {
+    path: '/adinfo/:id',
+    name: 'AdInfo',
+    component: AdInfo,
+    props: true,
+  },
+  {
+    path: '/myadinfo/:id',
+    name: 'MyAdInfo',
+    component: MyAdInfo,
+    props: true,
   },
 ]
 
