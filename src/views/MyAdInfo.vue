@@ -113,17 +113,15 @@
         <User />
         <div class="col-md-9">
           <h1 class="head">Мои объявления:</h1>
-          <h1 class="head">{{ ad.title }}</h1>
-          <div style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px">
+          <h2 class="head">{{ ad.title }}</h2>
+          <!-- <div style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px"> -->
             <img
               v-if="ad.photo"
               :src="checkPhoto(ad.photo)"
               class="image-order"
-              width="410"
-              height="410"
               alt="Фото объявления"
               @click="showLightbox(ad.photo)"
-              style="object-fit: fill; max-width: 100%; max-height: 100%"
+              style="object-fit: fill; max-width: 80%; max-height: 50%; border-radius: 10px; border: 1px solid #2b8025;"
             />
             <img
               v-else
@@ -134,7 +132,7 @@
               @click="showLightbox(defaultImage)"
               alt="Фото по умолчанию"
             />
-          </div>
+          <!-- </div> -->
           <p style="font-size: 25px; font-weight: 500">Город: {{ ad.location || 'Не указан' }}</p>
           <p style="font-size: 25px; font-weight: 500">
             Категория: {{ ad.category || 'Не указана' }}

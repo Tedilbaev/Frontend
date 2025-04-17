@@ -89,7 +89,7 @@
             <option value="name" selected="selected">Название</option>
             <option value="type">Тип услуги</option>
           </select>
-          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 500px">
+          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
             <table class="table table-striped w-100" id="myTable">
               <thead>
                 <tr>
@@ -124,7 +124,7 @@
             <input id="finished" type="button" class="btn custom-btn" value="Завершено"></input>
             <input id="declined" type="button" class="btn custom-btn" value="Отклонено"></input>
           </div>
-          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 500px">
+          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
             <table class="table table-striped w-100" id="myTable1">
               <thead>
                 <tr>
@@ -134,6 +134,84 @@
                   <th scope="col" style="font-size: 15px;">Сумма (&#8381;)</th>
                   <th scope="col" style="font-size: 15px;">Дата</th>
                   <th scope="col" style="font-size: 15px;">Статус</th>
+                </tr>
+              </thead>
+              <tbody >
+                <tr >
+                  <td>1</td>
+                  <td>Услуги сантехника</td>
+                  <td>Сантехника</td>
+                  <td>5000.00</td>
+                  <td>19.06.2004</td>
+                  <td>Бла-бла...</td>
+                </tr>
+                <!-- Остальные строки -->
+                <tr>
+                  <td>2</td>
+                  <td>Услуги электрика</td>
+                  <td>Сантехника</td>
+                  <td>10000.00</td>
+                  <td>19.06.2004</td>
+                  <td>Активно</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="row" style="display: flex; justify-content: center;">
+        <div class="col-md-5">
+          <h1 class="head">Пользователи:</h1>
+          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу" v-model="searchQuery" @input="search">
+          <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;" v-model="searchType">
+            <option value="name" selected="selected">Название</option>
+            <option value="type">Тип услуги</option>
+          </select>
+          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
+            <table class="table table-striped w-100" id="myTable">
+              <thead>
+                <tr>
+                  <th scope="col" style="font-size: 15px;">ID</th>
+                  <th scope="col" style="font-size: 15px;">Никнейм</th>
+                  <th scope="col" style="font-size: 15px;">Почта</th>
+                  <th scope="col" style="font-size: 15px;">Создан</th>
+                  <th scope="col" style="font-size: 15px;">На счету (&#8381;)</th>
+                  <th scope="col" style="font-size: 15px;">Роль</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="ad in ads" :key="ad.id" @click="showDialog">
+                  <td>{{ad.id}}</td>
+                  <td>{{ ad.title }}</td>
+                  <td>{{ ad.category }}</td>
+                  <td>{{ formatDate(ad.createdAt) }}</td>
+                  <td>{{ ad.price }}</td>
+                  <td style="white-space: wrap;">вмвв</td>
+                </tr>
+                <!-- Остальные строки -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+  
+        <div class="col-md-5">
+          <h1 class="head">Модераторы:</h1>
+          <div style="margin: 10px 0 12px 0">
+            <input id="all" type="button" class="btn custom-btn" value="Все"></input>
+            <input id="active" type="button" class="btn custom-btn" value="Активно"></input>
+            <input id="finished" type="button" class="btn custom-btn" value="Завершено"></input>
+            <input id="declined" type="button" class="btn custom-btn" value="Отклонено"></input>
+          </div>
+          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 350px">
+            <table class="table table-striped w-100" id="myTable1">
+              <thead>
+                <tr>
+                  <th scope="col" style="font-size: 15px;">ID</th>
+                  <th scope="col" style="font-size: 15px;">Никнейм</th>
+                  <th scope="col" style="font-size: 15px;">Почта</th>
+                  <th scope="col" style="font-size: 15px;">Создан</th>
+                  <th scope="col" style="font-size: 15px;">На счету (&#8381;)</th>
+                  <th scope="col" style="font-size: 15px;">Роль</th>
                 </tr>
               </thead>
               <tbody >
