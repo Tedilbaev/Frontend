@@ -19,6 +19,9 @@
               <button type="button" class="btn custom-btn" @click="fetchUserAds('title', 'asc')">
                 А-Я
               </button>
+              <button type="button" class="btn custom-btn" @click="fetchUserAds('title', 'desc')">
+                Я-А
+              </button>
               <button
                 type="button"
                 class="btn custom-btn"
@@ -26,25 +29,22 @@
               >
                 Сначала новые
               </button>
-              <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'asc')">
-                Сначала дешевые
-              </button>
-              <!-- </div> -->
-              <!-- <div> -->
-              <button type="button" class="btn custom-btn" @click="fetchUserAds('title', 'desc')">
-                Я-А
-              </button>
+            <!-- </div> -->
+            <!-- <div> -->
               <button
-                type="button"
-                class="btn custom-btn"
-                @click="fetchUserAds('createdAt', 'asc')"
+              type="button"
+              class="btn custom-btn"
+              @click="fetchUserAds('createdAt', 'asc')"
               >
-                Сначала старые
-              </button>
-              <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'desc')">
-                Сначала дорогие
-              </button>
-              <!-- </div> -->
+              Сначала старые
+            </button>
+            <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'desc')">
+              Сначала дорогие
+            </button>
+          <!-- </div> -->
+          <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'asc')">
+            Сначала дешевые
+          </button>
             </div>
             <div id="pppp">
               <input

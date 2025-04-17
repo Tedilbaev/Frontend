@@ -204,9 +204,7 @@ export default {
       searchTitle: '',
     }
   },
-  computed: {
-    ...mapState(useUserStore, ['user']),
-  },
+  
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
     async fetchAllAds(sortBy = 'createdAt', order = 'desc', title = this.searchTitle) {
