@@ -46,12 +46,12 @@
               <label for="categoryOrder">Выберите категорию вашего объявления</label>
               <p>
                 <select v-model="adForm.category" id="categoryOrder" class="select">
-                  <option value="waterTech">Сантехника</option>
-                  <option value="electroTech">Электроника</option>
-                  <option value="scepIT">IT</option>
-                  <option value="household">Бытовая техника</option>
-                  <option value="hire">Услуга по найму</option>
-                  <option value="another">Другое</option>
+                  <option value="Сантехника">Сантехника</option>
+                  <option value="Электроника">Электроника</option>
+                  <option value="IT">IT</option>
+                  <option value="Бытовая техника">Бытовая техника</option>
+                  <option value="Услуга по найму">Услуга по найму</option>
+                  <option value="Другое">Другое</option>
                 </select>
               </p>
               <label for="your-picture">Прикрепите ваше фото</label>
@@ -117,23 +117,29 @@
           <h1 class="head">Мои объявления:</h1>
           <h2 class="head">{{ ad.title }}</h2>
           <!-- <div style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px"> -->
-            <img
-              v-if="ad.photo"
-              :src="checkPhoto(ad.photo)"
-              class="image-order"
-              alt="Фото объявления"
-              @click="showLightbox(ad.photo)"
-              style="object-fit: fill; max-width: 80%; max-height: 50%; border-radius: 10px; border: 1px solid #2b8025;"
-            />
-            <img
-              v-else
-              src="@/assets/images/default.png"
-              class="image-order"
-              width="410"
-              height="410"
-              @click="showLightbox(defaultImage)"
-              alt="Фото по умолчанию"
-            />
+          <img
+            v-if="ad.photo"
+            :src="checkPhoto(ad.photo)"
+            class="image-order"
+            alt="Фото объявления"
+            @click="showLightbox(ad.photo)"
+            style="
+              object-fit: fill;
+              max-width: 80%;
+              max-height: 50%;
+              border-radius: 10px;
+              border: 1px solid #2b8025;
+            "
+          />
+          <img
+            v-else
+            src="@/assets/images/default.png"
+            class="image-order"
+            width="410"
+            height="410"
+            @click="showLightbox(defaultImage)"
+            alt="Фото по умолчанию"
+          />
           <!-- </div> -->
           <p style="font-size: 25px; font-weight: 500">Город: {{ ad.location || 'Не указан' }}</p>
           <p style="font-size: 25px; font-weight: 500">
