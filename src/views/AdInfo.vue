@@ -30,7 +30,8 @@
                 <p style="font-size: 25px; font-weight:500;">Категория: {{ ad.category || 'Не указана' }}</p>
                 <p style="font-size: 25px;">{{ ad.description }}</p>
                 <p style="font-size: 35px; font-weight:500;">{{ ad.price }} &#8381;</p>
-                <p style="font-size: 25px;">Автор:
+                <button type="button" class="btn custom-btn" style="height: 40px;">Добавить в свои заказы</button>
+                <div style="font-size: 25px;">Автор:
                     <div style="background-color: white; box-shadow: 0px 5px 10px 2px rgba(34, 60, 80, 0.2); padding-left: 10px; border-radius: 20px; width: 50%; font-size: 22px; color: black;">
                         <a href="" style="width: 100%; display: inline-block; text-decoration: none; color: black;">
                             <img 
@@ -39,7 +40,8 @@
                                 width="50" 
                                 height="50">  {{ ad.user.username }} </a>
                         </div>
-                </p>
+                </div>
+
             </div>
         </div>   
     </div>
