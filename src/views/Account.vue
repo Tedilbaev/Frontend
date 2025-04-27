@@ -385,6 +385,9 @@ export default {
 .popup {
   height: 75%;
 }
+.delpopup {
+  height: 37%;
+}
 .preview {
   width: 100%;
   height: 100%;

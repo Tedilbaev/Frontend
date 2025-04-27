@@ -46,12 +46,7 @@
               <label for="categoryOrder">Выберите категорию вашего объявления</label>
               <p>
                 <select v-model="adForm.category" id="categoryOrder" class="select">
-                  <option value="Сантехника">Сантехника</option>
-                  <option value="Электроника">Электроника</option>
-                  <option value="IT">IT</option>
-                  <option value="Бытовая техника">Бытовая техника</option>
-                  <option value="Услуга по найму">Услуга по найму</option>
-                  <option value="Другое">Другое</option>
+                  <option v-for="cat in category" :key="cat.id" v-value="cat.name">{{ cat.name}}</option>
                 </select>
               </p>
               <label for="your-picture">Прикрепите ваше фото</label>
@@ -83,6 +78,26 @@
             <button type="button" class="btn custom-btn" @click="closeDialog">Отмена</button>
           </div>
           <p v-if="error" style="color: red; text-align: center">{{ error }}</p>
+        </div>
+      </dialog>
+    </div>
+
+    <div class="holder" style="overflow-y: hidden">
+      <dialog class="delpopup" style="overflow-y: hidden" id="deleting">
+        <div class="content" style="overflow-y: hidden">
+          <h1 style="text-align: center">Удалить категорию</h1>
+          <div class="text-center">
+            <p style="font-size: 25px; text-align: left">
+              Вы уверены, что хотите удалить категорию? После удаления вернуть его будет
+              невозможно!
+            </p>
+            <button type="button" class="btn custom-btn" @click="deleteCategory(currentCategoryId)">
+              Удалить категорию
+            </button>
+            <button type="button" class="btn custom-btn" @click="closeDialogDelete('#deleting')">
+              Отмена
+            </button>
+          </div>
         </div>
       </dialog>
     </div>
@@ -168,10 +183,10 @@
       <div class="row" style="display: flex; justify-content: center;">
         <div class="col-md-5">
           <h1 class="head">Пользователи:</h1>
-          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу" v-model="searchQuery" @input="search">
-          <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;" v-model="searchType">
-            <option value="name" selected="selected">Название</option>
-            <option value="type">Тип услуги</option>
+          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по никнейму или почте" v-model="userSearchQuery" @input="searchUser">
+          <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;" v-model="userSearchType">
+            <option value="username" selected="selected">Никнейм</option>
+            <option value="email">Почта</option>
           </select>
           <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
             <table class="table table-striped w-100" id="myTable">
@@ -186,13 +201,13 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="ad in ads" :key="ad.id" @click="showDialog">
-                  <td>{{ad.id}}</td>
-                  <td>{{ ad.title }}</td>
-                  <td>{{ ad.category }}</td>
-                  <td>{{ formatDate(ad.createdAt) }}</td>
-                  <td>{{ ad.price }}</td>
-                  <td style="white-space: wrap;">вмвв</td>
+                <tr v-for="user in users" :key="user.id" @click="showDialog">
+                  <td>{{user.id}}</td>
+                  <td>{{ user.username }}</td>
+                  <td>{{ user.email }}</td>
+                  <td>{{ formatDate(user.createdAt) }}</td>
+                  <td>{{ user.balance || '0.00' }}</td>
+                  <td style="white-space: wrap;"> {{ user.role }}</td>
                 </tr>
                 <!-- Остальные строки -->
               </tbody>
@@ -246,31 +261,24 @@
       <div class="row" style="display: flex; justify-content: center;">
         <div class="col-md-5">
           <h1 class="head">Категории услуг:</h1>
-          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по названию или типу" v-model="searchQuery" @input="search">
-          <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;" v-model="searchType">
-            <option value="name" selected="selected">Название</option>
-            <option value="type">Тип услуги</option>
-          </select>
+          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" placeholder="Поиск по названию" v-model="categorySearchQuery" @input="searchCategory">
+          <button type="button" class="btn custom-btn" style="height: 35px;" @click="createСategory">Создать категорию</button>
           <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
             <table class="table table-striped w-100" id="myTable">
               <thead>
                 <tr>
                   <th scope="col" style="font-size: 15px;">ID</th>
                   <th scope="col" style="font-size: 15px;">Название услуги</th>
-                  <th scope="col" style="font-size: 15px;">Можеть быть</th>
-                  <th scope="col" style="font-size: 15px;">здесь что-то будет</th>
+                  <th scope="col" style="font-size: 15px;">Создан</th>
                   <!-- <th scope="col" style="font-size: 15px;">На счету (&#8381;)</th>
                   <th scope="col" style="font-size: 15px;">Роль</th> -->
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="ad in ads" :key="ad.id" @click="showDialog">
-                  <td>{{ad.id}}</td>
-                  <td>{{ ad.title }}</td>
-                  <td>{{ ad.category }}</td>
-                  <td>{{ formatDate(ad.createdAt) }}</td>
-                  <!-- <td>{{ ad.price }}</td>
-                  <td style="white-space: wrap;">вмвв</td> -->
+                <tr v-for="cat in category" :key="cat.id" @click="showDialogDelete('#deleting', cat.id)">
+                  <td>{{ cat.id }}</td>
+                  <td>{{ cat.name }}</td>
+                  <td>{{ formatDate(cat.createdAt) }}</td>
                 </tr>
                 <!-- Остальные строки -->
               </tbody>
@@ -306,6 +314,12 @@ export default {
       serverBaseUrl: 'http://localhost:8080',
       searchQuery: '',
       searchType: 'name',
+      users: [], 
+      userSearchQuery: '',
+      userSearchType: 'username',
+      category: [],
+      categorySearchQuery: '',
+      currentCategoryId: null,
       adForm: {
         title: '',
         description: '',
@@ -359,6 +373,144 @@ export default {
         }
       } catch (e) {
         this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async fetchAllUsers(sortBy = 'createdAt', order = 'desc', query = '', type = this.userSearchType) {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/user/all')
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (query && type === 'username') {
+          url.searchParams.append('username', query)
+        } else if (query && type === 'email') {
+          url.searchParams.append('email', query)
+        }
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.users = await response.json()
+          this.users = this.users.map((user) => ({
+            ...user,
+            photo: this.checkPhoto(user.avatarUrl),
+          }))
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки пользователей: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async fetchAllCategory(sortBy = 'createdAt', order = 'desc', query = '') {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/category/all')
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (query) {
+          url.searchParams.append('name', query)
+        }
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.category = await response.json()
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки категорий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async createСategory() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      const formData = new FormData()
+      formData.append('name', this.categorySearchQuery)
+      try {
+        const response = await fetch(`http://localhost:8080/api/category/create`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+        if (response.ok) {
+          const category = await response.json()
+          this.categorySearchQuery = '';
+          this.fetchAllCategory('createdAt', 'asc')
+        } else {
+          const errorText = await response.text()
+          this.error = 'Ошибка создания категории: ' + response.status + ' - ' + errorText
+          console.error('Ошибка сервера:', errorText)
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при создании объявления'
+        console.error('Исключение:', e)
+      }
+    },
+    async deleteCategory(CategoryId) {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const response = await fetch(`http://localhost:8080/api/category/delete/${CategoryId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.error = ''
+          this.closeDialogDelete('#deleting')
+          await this.fetchAllCategory() // Обновляем список объявлений
+        } else if (response.status === 403) {
+          this.error = 'Доступ запрещен'
+        } else if (response.status === 404) {
+          this.error = 'Категория не найдена'
+        } else {
+          this.error = 'Ошибка удаления категории: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при удалении категории'
         console.error('Исключение:', e)
       }
     },
@@ -477,12 +629,34 @@ export default {
         console.error('Исключение:', e)
       }
     },
+    showDialogDelete(dialogwindow, id) {
+      this.currentCategoryId = id
+      document.querySelector(dialogwindow).showModal()
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
+    },
+    closeDialogDelete(dialogwindow) {
+      this.error = ''
+      this.previewImage = null
+      this.currentCategoryId = null
+      document.querySelector(dialogwindow).close()
+    },
     search() {
       this.fetchAllAds('createdAt', 'asc', this.searchQuery, this.searchType)
     },
+    searchUser() {
+      this.fetchAllUsers('createdAt', 'asc', this.userSearchQuery, this.userSearchType)
+    },
+    searchCategory() {
+      this.fetchAllCategory('createdAt', 'asc', this.categorySearchQuery)
+    }
   },
   mounted() {
     this.fetchAllAds("createdAt", "asc")
+    this.fetchAllUsers('createdAt', 'asc')
+    this.fetchAllCategory('createdAt', 'asc')
+    this.fetchUserProfile()
   }
 }
 </script>

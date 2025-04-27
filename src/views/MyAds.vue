@@ -29,22 +29,22 @@
               >
                 Сначала новые
               </button>
-            <!-- </div> -->
-            <!-- <div> -->
+              <!-- </div> -->
+              <!-- <div> -->
               <button
-              type="button"
-              class="btn custom-btn"
-              @click="fetchUserAds('createdAt', 'asc')"
+                type="button"
+                class="btn custom-btn"
+                @click="fetchUserAds('createdAt', 'asc')"
               >
-              Сначала старые
-            </button>
-            <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'desc')">
-              Сначала дорогие
-            </button>
-          <!-- </div> -->
-          <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'asc')">
-            Сначала дешевые
-          </button>
+                Сначала старые
+              </button>
+              <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'desc')">
+                Сначала дорогие
+              </button>
+              <!-- </div> -->
+              <button type="button" class="btn custom-btn" @click="fetchUserAds('price', 'asc')">
+                Сначала дешевые
+              </button>
             </div>
             <div id="pppp">
               <input
@@ -155,12 +155,9 @@
               <label for="categoryOrder">Выберите категорию вашего объявления</label>
               <p>
                 <select id="categoryOrder" class="select" v-model="newAd.category">
-                  <option value="Сантехника">Сантехника</option>
-                  <option value="Электроника">Электроника</option>
-                  <option value="IT">IT</option>
-                  <option value="Бытовая техника">Бытовая техника</option>
-                  <option value="Услуга по найму">Услуга по найму</option>
-                  <option value="Другое">Другое</option>
+                  <option v-for="cat in category" :key="cat.id" v-value="cat.name">
+                    {{ cat.name }}
+                  </option>
                 </select>
               </p>
               <label for="your-picture">Прикрепите Ваше фото</label>
@@ -240,6 +237,7 @@ export default {
         category: '',
         photo: null,
       },
+      category: [],
       previewImage: null,
       defaultImage,
       searchTitle: '',
@@ -280,6 +278,41 @@ export default {
           this.$router.push('/login')
         } else {
           this.error = 'Ошибка загрузки объявлений: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async fetchAllCategory(sortBy = 'createdAt', order = 'desc', query = '') {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/category/all')
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (query) {
+          url.searchParams.append('name', query)
+        }
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.category = await response.json()
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки категорий: ' + response.status
         }
       } catch (e) {
         this.error = 'Ошибка сервера'
@@ -393,6 +426,7 @@ export default {
   mounted() {
     this.fetchUserProfile()
     this.fetchUserAds('createdAt', 'desc')
+    this.fetchAllCategory('createdAt', 'asc')
     window.addEventListener('scroll', this.handleScroll)
     const btnUp = document.querySelector('.btn-up')
     if (btnUp) {

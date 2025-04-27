@@ -46,12 +46,9 @@
               <label for="categoryOrder">Выберите категорию вашего объявления</label>
               <p>
                 <select v-model="adForm.category" id="categoryOrder" class="select">
-                  <option value="Сантехника">Сантехника</option>
-                  <option value="Электроника">Электроника</option>
-                  <option value="IT">IT</option>
-                  <option value="Бытовая техника">Бытовая техника</option>
-                  <option value="Услуга по найму">Услуга по найму</option>
-                  <option value="Другое">Другое</option>
+                  <option v-for="cat in category" :key="cat.id" v-value="cat.name">
+                    {{ cat.name }}
+                  </option>
                 </select>
               </p>
               <label for="your-picture">Прикрепите ваше фото</label>
@@ -201,6 +198,7 @@ export default {
           avatarUrl: '',
         },
       },
+      category: [],
       adForm: {
         title: '',
         description: '',
@@ -254,6 +252,41 @@ export default {
         console.error('Ошибка:', error)
       } finally {
         this.loading = false
+      }
+    },
+    async fetchAllCategory(sortBy = 'createdAt', order = 'desc', query = '') {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/category/all')
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (query) {
+          url.searchParams.append('name', query)
+        }
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.category = await response.json()
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки категорий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
       }
     },
     async updateAd() {
@@ -366,6 +399,7 @@ export default {
   mounted() {
     this.fetchUserProfile()
     this.fetchAd()
+    this.fetchAllCategory('createdAt', 'asc')
   },
 }
 </script>
@@ -377,7 +411,7 @@ export default {
   margin-top: 10px;
 }
 .popup {
-  height: 75%;
+  height: 70%;
 }
 .preview {
   width: 100%;
