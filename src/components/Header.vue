@@ -40,7 +40,7 @@
             <span class="text">Аккаунт</span>
           </router-link>
         </li>
-        <li v-if="user?.role === 'ADMIN'">
+        <li v-if="user?.role === 'ADMIN' || user?.role === 'MODER'">
           <router-link to="/admin" title="Admin">
             <span class="text">Админ-панель</span>
           </router-link>

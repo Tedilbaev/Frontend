@@ -176,6 +176,7 @@ export default {
         })
         if (response.ok) {
           const order = await response.json()
+          this.$router.push('/myorder')
           // this.categorySearchQuery = '';
           // this.fetchAllCategory('createdAt', 'asc')
         } else {

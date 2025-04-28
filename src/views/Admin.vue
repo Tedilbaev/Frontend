@@ -181,7 +181,7 @@
         </div>
       </div>
       <div class="row" style="display: flex; justify-content: center;">
-        <div class="col-md-5">
+        <div v-if="user?.role === 'ADMIN'" class="col-md-5">
           <h1 class="head">Пользователи:</h1>
           <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по никнейму или почте" v-model="userSearchQuery" @input="searchUser">
           <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;" v-model="userSearchType">
@@ -215,14 +215,13 @@
           </div>
         </div>
   
-        <div class="col-md-5">
+        <div v-if="user?.role === 'ADMIN'" class="col-md-5">
           <h1 class="head">Модераторы:</h1>
-          <div style="margin: 10px 0 12px 0">
-            <input id="all" type="button" class="btn custom-btn" value="Все"></input>
-            <input id="active" type="button" class="btn custom-btn" value="Активно"></input>
-            <input id="finished" type="button" class="btn custom-btn" value="Завершено"></input>
-            <input id="declined" type="button" class="btn custom-btn" value="Отклонено"></input>
-          </div>
+          <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" onkeyup="finding()" placeholder="Поиск по никнейму или почте" v-model="moderSearchQuery" @input="searchModer">
+          <select id="filter" class="select" name="filter" style="width:150px; padding-left: 5px;" v-model="moderSearchType">
+            <option value="username" selected="selected">Никнейм</option>
+            <option value="email">Почта</option>
+          </select>
           <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
             <table class="table table-striped w-100" id="myTable1">
               <thead>
@@ -236,23 +235,15 @@
                 </tr>
               </thead>
               <tbody >
-                <tr >
-                  <td>1</td>
-                  <td>Услуги сантехника</td>
-                  <td>Сантехника</td>
-                  <td>5000.00</td>
-                  <td>19.06.2004</td>
-                  <td>Бла-бла...</td>
+                <tr v-for="moder in moders" :key="moder.id" @click="showDialog">
+                  <td>{{moder.id}}</td>
+                  <td>{{ moder.username }}</td>
+                  <td>{{ moder.email }}</td>
+                  <td>{{ formatDate(moder.createdAt) }}</td>
+                  <td>{{ moder.balance || '0.00' }}</td>
+                  <td style="white-space: wrap;"> {{ moder.role }}</td>
                 </tr>
                 <!-- Остальные строки -->
-                <tr>
-                  <td>2</td>
-                  <td>Услуги электрика</td>
-                  <td>Сантехника</td>
-                  <td>10000.00</td>
-                  <td>19.06.2004</td>
-                  <td>Активно</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -296,7 +287,7 @@
 <script>
 import Header from '@/components/Header.vue'
 import Footer from '@/components/Footer.vue'
-import { mapActions } from 'pinia'
+import { mapActions, mapState } from 'pinia'
 import { useUserStore } from '@/stores/user'
 import defaultImage from '@/assets/images/default.png'
 
@@ -317,6 +308,9 @@ export default {
       users: [], 
       userSearchQuery: '',
       userSearchType: 'username',
+      moders: [], 
+      moderSearchQuery: '',
+      moderSearchType: 'username',
       category: [],
       categorySearchQuery: '',
       currentCategoryId: null,
@@ -331,6 +325,9 @@ export default {
       currentAd: { id: null, title: '', description: '', price: '', category: '', photo: '' },
       defaultImage,
     }
+  },
+  computed: {
+    ...mapState(useUserStore, ['user']),
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
@@ -405,6 +402,48 @@ export default {
           this.users = this.users.map((user) => ({
             ...user,
             photo: this.checkPhoto(user.avatarUrl),
+          }))
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки пользователей: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async fetchAllModers(sortBy = 'createdAt', order = 'desc', query = '', type = this.moderSearchType) {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/user/moder')
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (query && type === 'username') {
+          url.searchParams.append('username', query)
+        } else if (query && type === 'email') {
+          url.searchParams.append('email', query)
+        }
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.moders = await response.json()
+          this.moders = this.moders.map((moder) => ({
+            ...moder,
+            photo: this.checkPhoto(moder.avatarUrl),
           }))
         } else if (response.status === 401 || response.status === 403) {
           this.error = 'Сессия истекла или доступ запрещен'
@@ -648,6 +687,9 @@ export default {
     searchUser() {
       this.fetchAllUsers('createdAt', 'asc', this.userSearchQuery, this.userSearchType)
     },
+    searchModer() {
+      this.fetchAllModers('createdAt', 'asc', this.moderSearchQuery, this.moderSearchType)
+    },
     searchCategory() {
       this.fetchAllCategory('createdAt', 'asc', this.categorySearchQuery)
     }
@@ -655,6 +697,7 @@ export default {
   mounted() {
     this.fetchAllAds("createdAt", "asc")
     this.fetchAllUsers('createdAt', 'asc')
+    this.fetchAllModers('createdAt', 'asc')
     this.fetchAllCategory('createdAt', 'asc')
     this.fetchUserProfile()
   }
