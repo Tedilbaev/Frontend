@@ -134,7 +134,44 @@
               alt="Фото по умолчанию"
             />
           </div> -->
-          <div class="carousel">
+
+          <div class="carousel-container">
+            <div class="carousel">
+              <template v-if="allPhotos.length > 0">
+                <div v-for="(photo, index) in allPhotos" :key="index" class="photo-container">
+                  <img
+                    :src="checkPhoto(photo.url)"
+                    class="image-order"
+                    :alt="'Фото объявления ' + (index + 1)"
+                    @click="showLightbox(photo.url)"
+                  />
+                  <button class="delete-photo-btn" @click.stop="deletePhoto(photo.id)">
+                    ×
+                  </button>
+                </div>
+              </template>
+              <img
+                v-else
+                :src="defaultImage"
+                class="image-order"
+                @click="showLightbox(defaultImage)"
+                alt="Фото по умолчанию"
+              />
+            </div>
+          </div>
+
+          <div class="photo-management">
+            <input
+              type="file"
+              id="add-photos"
+              accept=".jpg, .jpeg, .png"
+              multiple
+              @change="handleNewPhotos"
+              style="display: none"
+            />
+            <label for="add-photos" class="btn custom-btn">Добавить фото</label>
+          </div>
+          <!-- <div class="carousel">
             <template v-if="allPhotos.length > 0">
               <img
                 v-for="(photo, index) in allPhotos"
@@ -159,9 +196,9 @@
           <div class="slider-container">
             <button class="btn custom-btn" @click="previousSlide">❮ предыдущая фотография</button>
             <button class="btn custom-btn" @click="nextSlide">следующая фотография ❯</button>
-          </div>
+          </div> -->
 
-          <div class="photo-management">
+          <!-- <div class="photo-management">
             <input
               type="file"
               id="add-photos"
@@ -178,7 +215,7 @@
             >
               Удалить текущее фото
             </button>
-          </div>
+          </div> -->
           <!-- </div> -->
           <p style="font-size: 25px; font-weight: 500">Город: {{ ad.location || 'Не указан' }}</p>
           <p style="font-size: 25px; font-weight: 500">
@@ -638,27 +675,61 @@ export default {
   object-fit: contain;
 }
 
-.carousel {
-  padding: 20px 2px 2px;
-  height: 50%;
+.carousel-container {
   width: 100%;
-  overflow-x: scroll;
-  scroll-snap-type: x mandatory;
-  display: flex;
-  gap: 10px;
-  scroll-behavior: smooth;
+  margin: 0 auto;
+  padding: 10px 0;
 }
 
-.carousel > img {
+.carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+  scroll-snap-type: x mandatory;
+}
+
+.photo-container {
+  position: relative;
+  flex: 0 0 auto;
   scroll-snap-align: center;
 }
-.slider-container {
-  padding-top: 10px;
-  position: relative;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  outline: none;
-  justify-content: space-between;
+
+.image-order {
+  width: 300px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #2b8025;
+  cursor: pointer;
+ }
+
+.delete-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 25px;
+  height: 25px;
+  background-color: rgba(252, 252, 252, 0.966);
+  color: rgb(0, 0, 0);
+  border: 1px solid black ;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.delete-photo-btn:hover {
+  background-color: rgba(255, 0, 0, 0.9);
+  color: white;
+}
+
+.photo-management {
+  margin-top: 20px;
+  text-align: left;
 }
 </style>
