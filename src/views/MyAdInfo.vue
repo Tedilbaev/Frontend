@@ -135,9 +135,9 @@
             />
           </div> -->
           <div class="carousel">
-            <template v-if="photos.length > 0">
+            <template v-if="allPhotos.length > 0">
               <img
-                v-for="(photo, index) in photos"
+                v-for="(photo, index) in allPhotos"
                 :key="index"
                 :src="checkPhoto(photo.url)"
                 class="image-order"
@@ -160,25 +160,25 @@
             <button class="btn custom-btn" @click="previousSlide">❮ предыдущая фотография</button>
             <button class="btn custom-btn" @click="nextSlide">следующая фотография ❯</button>
           </div>
-          
+
           <div class="photo-management">
-              <input
-                type="file"
-                id="add-photos"
-                accept=".jpg, .jpeg, .png"
-                multiple
-                @change="handleNewPhotos"
-                style="display: none"
-              />
-              <label for="add-photos" class="btn custom-btn">Добавить фото</label>
-              <button
-                v-if="photos.length > 0"
-                class="btn custom-btn delete-btn"
-                @click="deleteCurrentPhoto"
-              >
-                Удалить текущее фото
-              </button>
-            </div>
+            <input
+              type="file"
+              id="add-photos"
+              accept=".jpg, .jpeg, .png"
+              multiple
+              @change="handleNewPhotos"
+              style="display: none"
+            />
+            <label for="add-photos" class="btn custom-btn">Добавить фото</label>
+            <button
+              v-if="photos.length > 0"
+              class="btn custom-btn delete-btn"
+              @click="deleteCurrentPhoto"
+            >
+              Удалить текущее фото
+            </button>
+          </div>
           <!-- </div> -->
           <p style="font-size: 25px; font-weight: 500">Город: {{ ad.location || 'Не указан' }}</p>
           <p style="font-size: 25px; font-weight: 500">
@@ -263,6 +263,26 @@ export default {
   },
   computed: {
     ...mapState(useUserStore, ['user']),
+    allPhotos() {
+      const combined = []
+      if (this.ad.photo) {
+        combined.push({
+          url: this.ad.photo,
+          isMain: true,
+        })
+      }
+      if (this.photos.length > 0) {
+        this.photos.forEach((photo) => {
+          if (!this.ad.photo || photo.photo !== this.ad.photo) {
+            combined.push({
+              url: photo.photo,
+              isMain: false,
+            })
+          }
+        })
+      }
+      return combined
+    },
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
@@ -468,26 +488,26 @@ export default {
     //   }
     // },
     async createPhoto() {
-      const token = localStorage.getItem('jwt');
+      const token = localStorage.getItem('jwt')
       if (!token) {
-        this.error = 'Вы не авторизованы';
-        this.$router.push('/login');
-        return;
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
       }
 
       // Проверка наличия файлов
       if (!this.newPhotos || this.newPhotos.length === 0) {
-        this.error = 'Нет файлов для загрузки';
-        return;
+        this.error = 'Нет файлов для загрузки'
+        return
       }
 
-      const formData = new FormData();
-      formData.append('adId', this.ad.id);
-      
+      const formData = new FormData()
+      formData.append('adId', this.ad.id)
+
       // Добавляем КАЖДЫЙ файл отдельно с одинаковым именем поля 'photoFiles'
-      this.newPhotos.forEach(file => {
-        formData.append('photo', file); // Ключевое изменение - одинаковое имя поля
-      });
+      this.newPhotos.forEach((file) => {
+        formData.append('photo', file) // Ключевое изменение - одинаковое имя поля
+      })
 
       try {
         const response = await fetch(`${this.serverBaseUrl}/api/photos/create`, {
@@ -496,20 +516,20 @@ export default {
             Authorization: `Bearer ${token}`,
             // Не добавляем Content-Type - браузер сам установит с boundary
           },
-          body: formData
-        });
+          body: formData,
+        })
 
         if (response.ok) {
-          await this.fetchAllPhoto();
-          this.newPhotos = [];
-          this.error = '';
+          await this.fetchAllPhoto()
+          this.newPhotos = []
+          this.error = ''
         } else {
-          const errorData = await response.json().catch(() => null);
-          this.error = `Ошибка: ${errorData?.message || response.statusText}`;
+          const errorData = await response.json().catch(() => null)
+          this.error = `Ошибка: ${errorData?.message || response.statusText}`
         }
       } catch (e) {
-        this.error = 'Ошибка соединения';
-        console.error('Upload error:', e);
+        this.error = 'Ошибка соединения'
+        console.error('Upload error:', e)
       }
     },
     async deletePhoto(photoId) {
