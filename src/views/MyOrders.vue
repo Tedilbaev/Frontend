@@ -1,6 +1,7 @@
 <template>
   <Header />
   <main>
+    <div class="btn-up btn-up_hide" @click="scrollToTop"></div>
     <div class="container" id="app">
       <div class="row">
         <User />
@@ -190,10 +191,36 @@ export default {
     searchByTitle() {
       this.fetchUserOrders('createdAt', 'desc', this.searchTitle)
     },
+    handleScroll() {
+      const btnUp = document.querySelector('.btn-up')
+      if (window.scrollY > 300) {
+        btnUp.classList.remove('btn-up_hide')
+      } else {
+        btnUp.classList.add('btn-up_hide')
+      }
+    },
+    scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    },
   },
   mounted() {
     this.fetchUserProfile()
     this.fetchUserOrders()
+    window.addEventListener('scroll', this.handleScroll)
+    const btnUp = document.querySelector('.btn-up')
+    if (btnUp) {
+      btnUp.addEventListener('click', this.scrollToTop)
+    }
+  },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll)
+    const btnUp = document.querySelector('.btn-up')
+    if (btnUp) {
+      btnUp.removeEventListener('click', this.scrollToTop)
+    }
   },
 }
 </script>

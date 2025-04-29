@@ -1,6 +1,7 @@
 <template>
   <Header />
   <main>
+    <div class="btn-up btn-up_hide" @click="scrollToTop"></div>
     <div class="container" id="app">
       <div class="row">
         <User />
@@ -204,7 +205,7 @@ export default {
       searchTitle: '',
     }
   },
-  
+
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
     async fetchAllAds(sortBy = 'createdAt', order = 'desc', title = this.searchTitle) {
@@ -296,6 +297,20 @@ export default {
     searchByTitle() {
       this.fetchAllAds('createdAt', 'desc', this.searchTitle)
     },
+    handleScroll() {
+      const btnUp = document.querySelector('.btn-up')
+      if (window.scrollY > 300) {
+        btnUp.classList.remove('btn-up_hide')
+      } else {
+        btnUp.classList.add('btn-up_hide')
+      }
+    },
+    scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    },
   },
   created() {
     this.fetchCities()
@@ -303,6 +318,18 @@ export default {
   mounted() {
     this.fetchUserProfile()
     this.fetchAllAds('createdAt', 'desc')
+    window.addEventListener('scroll', this.handleScroll)
+    const btnUp = document.querySelector('.btn-up')
+    if (btnUp) {
+      btnUp.addEventListener('click', this.scrollToTop)
+    }
+  },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll)
+    const btnUp = document.querySelector('.btn-up')
+    if (btnUp) {
+      btnUp.removeEventListener('click', this.scrollToTop)
+    }
   },
 }
 </script>
