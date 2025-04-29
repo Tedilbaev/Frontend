@@ -198,6 +198,8 @@ export default {
           avatarUrl: '',
         },
       },
+      photos: [],
+      newPhotos: [], // Сюда закидывай новые фотки
       category: [],
       adForm: {
         title: '',
@@ -238,6 +240,7 @@ export default {
         }
 
         this.ad = await response.json()
+        this.fetchAllPhoto()
         this.adForm = {
           title: this.ad.title,
           description: this.ad.description || '',
@@ -354,6 +357,101 @@ export default {
         }
       } catch (e) {
         this.error = 'Ошибка сервера при удалении объявления'
+        console.error('Исключение:', e)
+      }
+    },
+    async fetchAllPhoto() {
+      const token = localStorage.getItem('jwt')
+      console.log(this.ad.id)
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/photos/adPhotos')
+        url.searchParams.append('adId', this.ad.id)
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.photos = await response.json()
+          console.log(this.photos)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки фотографий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async createPhoto() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      const formData = new FormData()
+      formData.append('adId', this.ad.id)
+      formData.append('photo', this.newPhotos)
+      try {
+        const response = await fetch(`http://localhost:8080/api/photos/create`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+        if (response.ok) {
+          const photos = await response.json()
+          this.fetchAllPhoto()
+          this.newPhotos = []
+        } else {
+          const errorText = await response.text()
+          this.error = 'Ошибка добавления новых фотографий: ' + response.status + ' - ' + errorText
+          console.error('Ошибка сервера:', errorText)
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при добавлении фотографий'
+        console.error('Исключение:', e)
+      }
+    },
+    async deletePhoto(photoId) {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const response = await fetch(`http://localhost:8080/api/photos/delete/${photoId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.error = ''
+          // this.closeDialog('#deleting')
+          this.fetchAllPhoto()
+        } else if (response.status === 403) {
+          this.error = 'Вы не можете удалить эту фотографию'
+        } else if (response.status === 404) {
+          this.error = 'Фотография не найдена'
+        } else {
+          this.error = 'Ошибка удаления фотографии: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при удалении фотографии'
         console.error('Исключение:', e)
       }
     },
