@@ -115,7 +115,7 @@
           <h2 class="head">{{ ad.title }}</h2>
 
           <!-- <div style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px"> -->
-          <div class="carousel">
+          <!-- <div class="carousel">
             <img
               v-if="ad.photo"
               :src="checkPhoto(ad.photo)"
@@ -133,11 +133,89 @@
               @click="showLightbox(defaultImage)"
               alt="Фото по умолчанию"
             />
+          </div> -->
+
+          <div class="carousel-container">
+            <div class="carousel">
+              <template v-if="allPhotos.length > 0">
+                <div v-for="(photo, index) in allPhotos" :key="index" class="photo-container">
+                  <img
+                    :src="checkPhoto(photo.url)"
+                    class="image-order"
+                    :alt="'Фото объявления ' + (index + 1)"
+                    @click="showLightbox(photo.url)"
+                  />
+                  <button class="delete-photo-btn" @click.stop="deletePhoto(photo.id)">
+                    ×
+                  </button>
+                </div>
+              </template>
+              <img
+                v-else
+                :src="defaultImage"
+                class="image-order"
+                @click="showLightbox(defaultImage)"
+                alt="Фото по умолчанию"
+              />
+            </div>
+          </div>
+
+          <div class="photo-management">
+            <input
+              type="file"
+              id="add-photos"
+              accept=".jpg, .jpeg, .png"
+              multiple
+              @change="handleNewPhotos"
+              style="display: none"
+            />
+            <label for="add-photos" class="btn custom-btn">Добавить фото</label>
+          </div>
+          <!-- <div class="carousel">
+            <template v-if="allPhotos.length > 0">
+              <img
+                v-for="(photo, index) in allPhotos"
+                :key="index"
+                :src="checkPhoto(photo.url)"
+                class="image-order"
+                :alt="'Фото объявления ' + (index + 1)"
+                @click="showLightbox(photo.url)"
+                style="object-fit: contain; border-radius: 10px; border: 1px solid #2b8025"
+              />
+            </template>
+            <img
+              v-else
+              :src="defaultImage"
+              class="image-order"
+              width="410"
+              height="410"
+              @click="showLightbox(defaultImage)"
+              alt="Фото по умолчанию"
+            />
           </div>
           <div class="slider-container">
             <button class="btn custom-btn" @click="previousSlide">❮ предыдущая фотография</button>
             <button class="btn custom-btn" @click="nextSlide">следующая фотография ❯</button>
-          </div>
+          </div> -->
+
+          <!-- <div class="photo-management">
+            <input
+              type="file"
+              id="add-photos"
+              accept=".jpg, .jpeg, .png"
+              multiple
+              @change="handleNewPhotos"
+              style="display: none"
+            />
+            <label for="add-photos" class="btn custom-btn">Добавить фото</label>
+            <button
+              v-if="photos.length > 0"
+              class="btn custom-btn delete-btn"
+              @click="deleteCurrentPhoto"
+            >
+              Удалить текущее фото
+            </button>
+          </div> -->
           <!-- </div> -->
           <p style="font-size: 25px; font-weight: 500">Город: {{ ad.location || 'Не указан' }}</p>
           <p style="font-size: 25px; font-weight: 500">
@@ -198,6 +276,7 @@ export default {
           avatarUrl: '',
         },
       },
+      currentPhotoIndex: 0,
       photos: [],
       newPhotos: [], // Сюда закидывай новые фотки
       category: [],
@@ -221,6 +300,26 @@ export default {
   },
   computed: {
     ...mapState(useUserStore, ['user']),
+    allPhotos() {
+      const combined = []
+      if (this.ad.photo) {
+        combined.push({
+          url: this.ad.photo,
+          isMain: true,
+        })
+      }
+      if (this.photos.length > 0) {
+        this.photos.forEach((photo) => {
+          if (!this.ad.photo || photo.photo !== this.ad.photo) {
+            combined.push({
+              url: photo.photo,
+              isMain: false,
+            })
+          }
+        })
+      }
+      return combined
+    },
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
@@ -393,6 +492,38 @@ export default {
         console.error('Исключение:', e)
       }
     },
+    // async createPhoto() {
+    //   const token = localStorage.getItem('jwt')
+    //   if (!token) {
+    //     this.error = 'Вы не авторизованы'
+    //     this.$router.push('/login')
+    //     return
+    //   }
+    //   const formData = new FormData()
+    //   formData.append('adId', this.ad.id)
+    //   formData.append('photoFIles', this.newPhotos)
+    //   try {
+    //     const response = await fetch(`http://localhost:8080/api/photos/create`, {
+    //       method: 'POST',
+    //       headers: {
+    //         Authorization: `Bearer ${token}`,
+    //       },
+    //       body: formData,
+    //     })
+    //     if (response.ok) {
+    //       const photos = await response.json()
+    //       this.fetchAllPhoto()
+    //       this.newPhotos = []
+    //     } else {
+    //       const errorText = await response.text()
+    //       this.error = 'Ошибка добавления новых фотографий: ' + response.status + ' - ' + errorText
+    //       console.error('Ошибка сервера:', errorText)
+    //     }
+    //   } catch (e) {
+    //     this.error = 'Ошибка сервера при добавлении фотографий'
+    //     console.error('Исключение:', e)
+    //   }
+    // },
     async createPhoto() {
       const token = localStorage.getItem('jwt')
       if (!token) {
@@ -400,29 +531,42 @@ export default {
         this.$router.push('/login')
         return
       }
+
+      // Проверка наличия файлов
+      if (!this.newPhotos || this.newPhotos.length === 0) {
+        this.error = 'Нет файлов для загрузки'
+        return
+      }
+
       const formData = new FormData()
       formData.append('adId', this.ad.id)
-      formData.append('photo', this.newPhotos)
+
+      // Добавляем КАЖДЫЙ файл отдельно с одинаковым именем поля 'photoFiles'
+      this.newPhotos.forEach((file) => {
+        formData.append('photo', file) // Ключевое изменение - одинаковое имя поля
+      })
+
       try {
-        const response = await fetch(`http://localhost:8080/api/photos/create`, {
+        const response = await fetch(`${this.serverBaseUrl}/api/photos/create`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
+            // Не добавляем Content-Type - браузер сам установит с boundary
           },
           body: formData,
         })
+
         if (response.ok) {
-          const photos = await response.json()
-          this.fetchAllPhoto()
+          await this.fetchAllPhoto()
           this.newPhotos = []
+          this.error = ''
         } else {
-          const errorText = await response.text()
-          this.error = 'Ошибка добавления новых фотографий: ' + response.status + ' - ' + errorText
-          console.error('Ошибка сервера:', errorText)
+          const errorData = await response.json().catch(() => null)
+          this.error = `Ошибка: ${errorData?.message || response.statusText}`
         }
       } catch (e) {
-        this.error = 'Ошибка сервера при добавлении фотографий'
-        console.error('Исключение:', e)
+        this.error = 'Ошибка соединения'
+        console.error('Upload error:', e)
       }
     },
     async deletePhoto(photoId) {
@@ -453,6 +597,13 @@ export default {
       } catch (e) {
         this.error = 'Ошибка сервера при удалении фотографии'
         console.error('Исключение:', e)
+      }
+    },
+    handleNewPhotos(e) {
+      const files = e.target.files
+      if (files && files.length > 0) {
+        this.newPhotos = Array.from(files)
+        this.createPhoto()
       }
     },
     handleFileChange(e) {
@@ -524,27 +675,61 @@ export default {
   object-fit: contain;
 }
 
-.carousel {
-  padding: 20px 2px 2px;
-  height: 50%;
+.carousel-container {
   width: 100%;
-  overflow-x: scroll;
-  scroll-snap-type: x mandatory;
-  display: flex;
-  gap: 10px;
-  scroll-behavior: smooth;
+  margin: 0 auto;
+  padding: 10px 0;
 }
 
-.carousel > img {
+.carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+  scroll-snap-type: x mandatory;
+}
+
+.photo-container {
+  position: relative;
+  flex: 0 0 auto;
   scroll-snap-align: center;
 }
-.slider-container {
-  padding-top: 10px;
-  position: relative;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  outline: none;
-  justify-content: space-between;
+
+.image-order {
+  width: 300px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #2b8025;
+  cursor: pointer;
+ }
+
+.delete-photo-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 25px;
+  height: 25px;
+  background-color: rgba(252, 252, 252, 0.966);
+  color: rgb(0, 0, 0);
+  border: 1px solid black ;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.delete-photo-btn:hover {
+  background-color: rgba(255, 0, 0, 0.9);
+  color: white;
+}
+
+.photo-management {
+  margin-top: 20px;
+  text-align: left;
 }
 </style>
