@@ -137,7 +137,7 @@
       </div>
   
         <div class="col-md-5">
-          <h1 class="head">Сделки:</h1>
+          <h1 class="head">Заказы:</h1>
           <div style="margin: 10px 0 12px 0">
             <input id="all" type="button" class="btn custom-btn" value="Все"></input>
             <input id="active" type="button" class="btn custom-btn" value="Активно"></input>
@@ -150,31 +150,23 @@
               <thead>
                 <tr>
                   <th scope="col" style="font-size: 15px;">№</th>
-                  <th scope="col" style="font-size: 15px;">Пользователь 1</th>
-                  <th scope="col" style="font-size: 15px;">Пользователь 2</th>
+                  <th scope="col" style="font-size: 15px;">Исполнитель</th>
+                  <th scope="col" style="font-size: 15px;">Заказчик</th>
                   <th scope="col" style="font-size: 15px;">Сумма (&#8381;)</th>
                   <th scope="col" style="font-size: 15px;">Дата</th>
                   <th scope="col" style="font-size: 15px;">Статус</th>
                 </tr>
               </thead>
               <tbody >
-                <tr >
-                  <td>1</td>
-                  <td>Услуги сантехника</td>
-                  <td>Сантехника</td>
-                  <td>5000.00</td>
-                  <td>19.06.2004</td>
-                  <td>Бла-бла...</td>
+                <tr v-for="order in orders" :key="order.id">
+                  <td>{{ order.id }}</td>
+                  <td>{{ order.performer.username }}</td>
+                  <td>{{ order.client.username }}</td>
+                  <td>{{ order.ad.price }}</td>
+                  <td>{{ formatDate(order.createdAt) }}</td>
+                  <td >{{ order.status }}</td>
                 </tr>
                 <!-- Остальные строки -->
-                <tr>
-                  <td>2</td>
-                  <td>Услуги электрика</td>
-                  <td>Сантехника</td>
-                  <td>10000.00</td>
-                  <td>19.06.2004</td>
-                  <td>Активно</td>
-                </tr>
               </tbody>
             </table>
           </div>
@@ -250,7 +242,7 @@
         </div>
       </div>
       <div class="row" style="display: flex; justify-content: center;">
-        <div class="col-md-5">
+        <div v-if="user?.role === 'ADMIN'" class="col-md-5">
           <h1 class="head">Категории услуг:</h1>
           <input class="custom-text" type="text" id="myInput" style="margin: 10px 0 15px 0" placeholder="Поиск по названию" v-model="categorySearchQuery" @input="searchCategory">
           <button type="button" class="btn custom-btn" style="height: 35px;" @click="createСategory">Создать категорию</button>
@@ -314,6 +306,8 @@ export default {
       category: [],
       categorySearchQuery: '',
       currentCategoryId: null,
+      orders: [],
+      orderSearchTitle: '',
       adForm: {
         title: '',
         description: '',
@@ -486,6 +480,46 @@ export default {
           this.$router.push('/login')
         } else {
           this.error = 'Ошибка загрузки категорий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async fetchAllOrders(sortBy = 'createdAt', order = 'desc', title = this.orderSearchTitle) {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL(`http://localhost:8080/api/orders/all`)
+        url.searchParams.append('sortBy', sortBy)
+        url.searchParams.append('order', order)
+        if (title) {
+          url.searchParams.append('title', title)
+        }
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.orders = await response.json()
+          this.orders = this.orders.map((order) => ({
+            ...order,
+            photo: this.checkPhoto(order.ad.photo),
+          }))
+          console.log(this.orders)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки заказа: ' + response.status
         }
       } catch (e) {
         this.error = 'Ошибка сервера'
@@ -699,6 +733,7 @@ export default {
     this.fetchAllUsers('createdAt', 'asc')
     this.fetchAllModers('createdAt', 'asc')
     this.fetchAllCategory('createdAt', 'asc')
+    this.fetchAllOrders('createdAt', 'asc')
     this.fetchUserProfile()
   }
 }
