@@ -335,7 +335,7 @@ export default {
       formData.append('description', this.newAd.description)
       formData.append('price', this.newAd.price)
       formData.append('category', this.newAd.category)
-      formData.append('location', this.user.location)
+      formData.append('location', 'Астрахань')
       if (this.newAd.photo) {
         formData.append('photo', this.newAd.photo)
       }
