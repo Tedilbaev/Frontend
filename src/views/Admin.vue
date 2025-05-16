@@ -123,8 +123,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="ad in ads" :key="ad.id" @click="openEditDialog(ad)">
-                <td>{{ ad.id }}</td>
+              <tr v-for="(ad, index) in ads" :key="ad.id" @click="openEditDialog(ad)">
+                <td>{{ index + 1 }}</td>
                 <td>{{ ad.title }}</td>
                 <td>{{ ad.category }}</td>
                 <td>{{ ad.price }}</td>
@@ -158,8 +158,8 @@
                 </tr>
               </thead>
               <tbody >
-                <tr v-for="order in orders" :key="order.id">
-                  <td>{{ order.id }}</td>
+                <tr v-for="(order, index) in orders" :key="order.id">
+                  <td>{{ index + 1 }}</td>
                   <td>{{ order.performer.username }}</td>
                   <td>{{ order.client.username }}</td>
                   <td>{{ order.ad.price }}</td>
@@ -193,8 +193,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="user in users" :key="user.id" @click="showDialog">
-                  <td>{{user.id}}</td>
+                <tr v-for="(user, index) in users" :key="user.id" @click="showDialog">
+                  <td>{{ index + 1}}</td>
                   <td>{{ user.username }}</td>
                   <td>{{ user.email }}</td>
                   <td>{{ formatDate(user.createdAt) }}</td>
@@ -227,8 +227,8 @@
                 </tr>
               </thead>
               <tbody >
-                <tr v-for="moder in moders" :key="moder.id" @click="showDialog">
-                  <td>{{moder.id}}</td>
+                <tr v-for="(moder, index) in moders" :key="moder.id" @click="showDialog">
+                  <td>{{ index + 1}}</td>
                   <td>{{ moder.username }}</td>
                   <td>{{ moder.email }}</td>
                   <td>{{ formatDate(moder.createdAt) }}</td>
@@ -258,8 +258,8 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="cat in category" :key="cat.id" @click="showDialogDelete('#deleting', cat.id)">
-                  <td>{{ cat.id }}</td>
+                <tr v-for="(cat, index) in category" :key="cat.id" @click="showDialogDelete('#deleting', cat.id)">
+                  <td>{{ index + 1 }}</td>
                   <td>{{ cat.name }}</td>
                   <td>{{ formatDate(cat.createdAt) }}</td>
                 </tr>
