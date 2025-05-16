@@ -41,7 +41,8 @@
             <button type="button" class="btn custom-btn" id="spend">Снять с счета</button>
           </p>
           <h4 class="head">История операций:</h4>
-          <table class="table text-center">
+          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
+           <table class="table table-striped w-100 text-center">
             <thead>
               <tr>
                 <th scope="col">№</th>
@@ -51,26 +52,18 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Зачисление</td>
-                <td>12.03.2025</td>
-                <td>5000.00</td>
+            <tr v-for="(transaction, index) in transactions" :key="transaction.id">
+                <td>{{ index + 1 }}</td>
+                <td>{{ transaction.type }}</td>
+                <td>{{ formatDate(transaction.createdAt) }}</td>
+                <td>{{ formatBalance(transaction.amount) }}</td>
               </tr>
-              <tr>
-                <td>2</td>
-                <td>Зачисление</td>
-                <td>15.03.2025</td>
-                <td>2000.20</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Списание</td>
-                <td>23.03.2025</td>
-                <td>4000.00</td>
+              <tr v-if="transactions.length === 0">
+                <td colspan="4">Нет операций</td>
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>
@@ -143,7 +136,7 @@ export default {
     formatDate(dateString) {
       if (!dateString) return ''
       const date = new Date(dateString)
-      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+      return date.toLocaleDateString() + ' '
     },
     async replenishBalance() {
       if (!this.amount || this.amount <= 0) {
@@ -175,7 +168,7 @@ export default {
           this.error = ''
           this.closeDialog('#replenish')
           await this.fetchUserProfile() 
-          await this.fetchTransactions() 
+          await this.fetchOperations() 
           this.amount = 0
         } else {
           const errorText = await response.text()

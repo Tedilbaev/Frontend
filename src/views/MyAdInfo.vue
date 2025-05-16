@@ -114,27 +114,6 @@
           <h1 class="head">Мои объявления:</h1>
           <h2 class="head">{{ ad.title }}</h2>
 
-          <!-- <div style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px"> -->
-          <!-- <div class="carousel">
-            <img
-              v-if="ad.photo"
-              :src="checkPhoto(ad.photo)"
-              class="image-order"
-              alt="Фото объявления"
-              @click="showLightbox(ad.photo)"
-              style="object-fit: contain; border-radius: 10px; border: 1px solid #2b8025"
-            />
-            <img
-              v-else
-              src="@/assets/images/default.png"
-              class="image-order"
-              width="410"
-              height="410"
-              @click="showLightbox(defaultImage)"
-              alt="Фото по умолчанию"
-            />
-          </div> -->
-
           <div class="carousel-container">
             <div class="carousel">
               <template v-if="allPhotos.length > 0">
@@ -259,6 +238,7 @@ export default {
       const combined = []
       if (this.ad.photo) {
         combined.push({
+          id: this.ad.id,
           url: this.ad.photo,
           isMain: true,
         })
@@ -267,6 +247,7 @@ export default {
         this.photos.forEach((photo) => {
           if (!this.ad.photo || photo.photo !== this.ad.photo) {
             combined.push({
+              id: photo.id,
               url: photo.photo,
               isMain: false,
             })
@@ -494,6 +475,7 @@ export default {
       }
     },
     async deletePhoto(photoId) {
+      console.log(photoId)
       const token = localStorage.getItem('jwt')
       if (!token) {
         this.error = 'Вы не авторизованы'
@@ -510,7 +492,7 @@ export default {
         if (response.ok) {
           this.error = ''
           // this.closeDialog('#deleting')
-          this.fetchAllPhoto()
+          this.fetchAd()
         } else if (response.status === 403) {
           this.error = 'Вы не можете удалить эту фотографию'
         } else if (response.status === 404) {
