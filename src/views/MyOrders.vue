@@ -65,7 +65,7 @@
             </div>
           </form>
           <div class="table-order" v-if="orders && orders.length > 0">
-            <div v-for="order in orders" :key="order.id" class="order" style="position: relative">
+            <div v-for="order in orders" :key="order.id" class="order" style="position: relative" @click="goToOrder(order.ad.id)">
               <img
                 v-if="order.ad.photo"
                 :src="checkPhoto(order.ad.photo)"
@@ -127,6 +127,7 @@ export default {
       apiBaseUrl: 'http://localhost:8080/api/orders',
       serverBaseUrl: 'http://localhost:8080',
       searchTitle: '',
+      check: true
     }
   },
   computed: {
@@ -204,6 +205,9 @@ export default {
         top: 0,
         behavior: 'smooth',
       })
+    },
+    goToOrder(adId) {
+      this.$router.push({ name: 'AdInfo', params: { id: adId } })
     },
   },
   mounted() {

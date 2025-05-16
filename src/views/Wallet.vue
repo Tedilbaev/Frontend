@@ -2,98 +2,32 @@
   <Header />
   <main>
     <div class="holder" style="overflow-y: hidden">
-      <dialog class="popup" style="overflow-y: hidden">
+      <dialog class="replenishpopup" style="overflow-y: hidden" id="replenish">
         <div class="content" style="overflow-y: hidden">
-          <h1 style="text-align: center">Создать объявление</h1>
-          <div class="row">
-            <div class="col-md-6">
-              <label for="nameOrder">Введите название объявления</label>
+          <h1 style="text-align: center">Пополнить счет</h1>
+          <div class="text-center">
+            <label for="amountReplen">Введите сумму пополнения</label>
               <p>
                 <input
+                  v-model="amount"
                   type="text"
-                  name="nameOrder"
-                  id="nameOrder"
-                  placeholder="Например: Ремонт машин"
+                  id="amountReplen"
+                  placeholder="Например: 1000.00"
                   class="custom-text"
                   style="width: 100%"
                   maxlength="50"
                 />
               </p>
-              <label for="noteOrder">Введите описание для вашего объявления</label>
-              <p>
-                <textarea
-                  class="custom-text wrap-text"
-                  name="noteOrder"
-                  id="noteOrder"
-                  rows="14"
-                  cols="10"
-                  wrap="soft"
-                  style="width: 100%"
-                >
-                </textarea>
-              </p>
-              <label for="priceOrder">Введите цену на услугу (Цена в рублях)</label>
-              <p>
-                <input
-                  type="text"
-                  name="priceOrder"
-                  id="priceOrder"
-                  placeholder="Например: 2000"
-                  class="custom-text"
-                  style="width: 100%"
-                  maxlength="10"
-                />
-              </p>
-              <label for="categoryOrder">Выберите категорию вашего объявления</label>
-              <p>
-                <select id="categoryOrder" class="select" name="Категория">
-                  <option value="waterTech">Сантехника</option>
-                  <option value="electroTech">Электроника</option>
-                  <option value="scepIT">IT</option>
-                  <option value="household">Бытовая техника</option>
-                  <option value="hire">Услуга по найму</option>
-                  <option value="another">Другое</option>
-                </select>
-              </p>
-              <label for="your-picture">Прикрепите Ваше фото</label>
-              <p>
-                <input
-                  type="file"
-                  id="your-picture"
-                  name="your-picture"
-                  accept=".jpg, .jpeg, .png"
-                />
-              </p>
-            </div>
-            <div class="col-md-6">
-              <div
-                style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px"
-              >
-                <div class="preview" id="previewContainer">
-                  <img id="preview" src="#" alt="Предпросмотр" />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="text-center" style="align-items: center; justify-content: center">
-            <button type="button" class="btn custom-btn" id="change">Изменить объявление</button>
-            <button type="button" class="btn custom-btn" id="cancel">Отмена</button>
+            <button type="button" class="btn custom-btn" @click="replenishBalance">
+              Пополнить
+            </button>
+            <button type="button" class="btn custom-btn" @click="closeDialog('#replenish')">
+              Отмена
+            </button>
           </div>
         </div>
       </dialog>
     </div>
-    <!-- <div class="holder" style="overflow-y: hidden;">
-            <dialog class="delpopup" style="overflow-y: hidden;" id="deleting">
-                <div class="content" style="overflow-y: hidden;">
-                    <h1 style="text-align: center;">Удалить объявление</h1>
-                    <div class="text-center" style="align-items: center; justify-content: center;">
-                        <p style="font-size: 25px; text-align: left;">Вы уверены, что хотите удалить объявление? После удаления вернуть его будет невозможно!</p>
-                        <button type="button" class="btn custom-btn" id="delete">Удалить объявление</button>
-                        <button type="button" class="btn custom-btn" id="cancel1">Отмена</button>
-                    </div>
-                </div>
-            </dialog> -->
-    <!-- </div> -->
     <div class="container" id="app">
       <div class="row">
         <User />
@@ -103,11 +37,12 @@
           <h2 v-if="user.balance" class="head">{{ user.balance }} &#8381;</h2>
           <h2 v-else class="head">0 &#8381;</h2>
           <p>
-            <button type="button" class="btn custom-btn" id="earn">Пополнить счет</button>
+            <button type="button" class="btn custom-btn" @click="showDialog('#replenish')">Пополнить счет</button>
             <button type="button" class="btn custom-btn" id="spend">Снять с счета</button>
           </p>
           <h4 class="head">История операций:</h4>
-          <table class="table text-center">
+          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
+           <table class="table table-striped w-100 text-center">
             <thead>
               <tr>
                 <th scope="col">№</th>
@@ -117,26 +52,18 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>1</td>
-                <td>Зачисление</td>
-                <td>12.03.2025</td>
-                <td>5000.00</td>
+            <tr v-for="(transaction, index) in transactions" :key="transaction.id">
+                <td>{{ index + 1 }}</td>
+                <td>{{ transaction.type }}</td>
+                <td>{{ formatDate(transaction.createdAt) }}</td>
+                <td>{{ formatBalance(transaction.amount) }}</td>
               </tr>
-              <tr>
-                <td>2</td>
-                <td>Зачисление</td>
-                <td>15.03.2025</td>
-                <td>2000.20</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td>Списание</td>
-                <td>23.03.2025</td>
-                <td>4000.00</td>
+              <tr v-if="transactions.length === 0">
+                <td colspan="4">Нет операций</td>
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>
@@ -159,14 +86,136 @@ export default {
     Footer,
     User,
   },
+  data() {
+    return {
+      transactions: [],
+      amount: 0,
+      error: '',
+    }
+  },
   computed: {
     ...mapState(useUserStore, ['user']),
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
+    async fetchOperations() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/balance/transactions')
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.transactions = await response.json()
+          console.log(this.transactions)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки фотографий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    formatBalance(value) {
+      if (!value) return '0.00'
+      return parseFloat(value).toFixed(2)
+    },
+    formatDate(dateString) {
+      if (!dateString) return ''
+      const date = new Date(dateString)
+      return date.toLocaleDateString() + ' '
+    },
+    async replenishBalance() {
+      if (!this.amount || this.amount <= 0) {
+        this.error = 'Введите корректную сумму'
+        return
+      }
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      console.log(this.user.id)
+      console.log(this.amount)
+      const formData = new FormData()
+      formData.append("userId",this.user.id)
+      formData.append("amount",this.amount)
+      console.log(...formData)
+      try {
+        const response = await fetch(`http://localhost:8080/api/balance/replenish`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+
+        if (response.ok) {
+          this.error = ''
+          this.closeDialog('#replenish')
+          await this.fetchUserProfile() 
+          await this.fetchOperations() 
+          this.amount = 0
+        } else {
+          const errorText = await response.text()
+          this.error = `Ошибка обновления объявления: ${errorText}`
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при обновлении объявления'
+        console.error('Исключение:', e)
+      }
+    },
+    showDialog(dialogwindow) {
+      document.querySelector(dialogwindow).showModal()
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
+    },
+    closeDialog(dialogwindow) {
+      this.error = ''
+      this.previewImage = null
+      document.querySelector(dialogwindow).close()
+    },
   },
   mounted() {
-    this.fetchUserProfile()
+    this.fetchUserProfile(),
+    this.fetchOperations()
   },
 }
 </script>
+<style scoped>
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+.popup {
+  height: 70%;
+}
+.preview {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#preview {
+  max-width: 100%;
+  max-height: 450px;
+  object-fit: contain;
+}
+</style>

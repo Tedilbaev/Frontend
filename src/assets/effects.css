@@ -113,35 +113,11 @@ input:focus::placeholder {
   height: 75%;
   opacity: 100%;
 }
-/* .order #text-order{
-    display: none;
-    transition: all .4s ease-in;
 
-} */
-/*
-.order #text-order p{
-    display: none;
-    opacity: 0%;
-    transition: opacity .4s ease-in .4s;
-}
-*/
 .order:hover {
   cursor: pointer;
 }
-/*
-.order .order-info:hover {
-    height: 75%;
-    opacity: 100%;
 
-}
-.order:hover #text-order {
-    opacity: 100%;
-} 
-.order:hover #text-order p{
-    display: block;
-    opacity: 100%;
-}
-*/
 .order-info {
   background-color: white;
   padding-left: 10px;
@@ -155,18 +131,6 @@ input:focus::placeholder {
   box-shadow: 0 0 4px rgb(160, 160, 160);
   /* transition: all .1s ease-out;  */
 }
-/* .order-info:hover #text-order {
-     display: block; 
-}
-
-.order-info:hover {
-    height: 75%;
-    opacity: 100%;
-} */
-/* 
-#text-order {
-    display: none;
-} */
 
 .table-order {
   margin: 20px 20px;
@@ -189,10 +153,6 @@ input:focus::placeholder {
   height: 75%;
   opacity: 100%;
 }
-/* 
-.image-order:hover + .order-info #text-order{
-    display: block;
-} */
 
 .holder {
   width: 100%;
@@ -278,7 +238,22 @@ input[type='file']::file-selector-button:hover {
   background: white;
   margin: 5px auto 0;
   padding: 6px;
-  position: fixed; /*типо высшая позиция над объектами*/
+  position: fixed; 
+  width: 35%;
+  height: 30%;
+  top: 25%;
+  box-shadow: 0px 5px 10px 2px rgba(34, 60, 80, 0.2);
+  z-index: 201;
+}
+
+.replenishpopup {
+  border-radius: 20px;
+  border-color: white;
+  border: 0px;
+  background: white;
+  margin: 5px auto 0;
+  padding: 6px;
+  position: fixed; 
   width: 35%;
   height: 30%;
   top: 25%;

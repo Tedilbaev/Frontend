@@ -114,27 +114,6 @@
           <h1 class="head">Мои объявления:</h1>
           <h2 class="head">{{ ad.title }}</h2>
 
-          <!-- <div style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px"> -->
-          <!-- <div class="carousel">
-            <img
-              v-if="ad.photo"
-              :src="checkPhoto(ad.photo)"
-              class="image-order"
-              alt="Фото объявления"
-              @click="showLightbox(ad.photo)"
-              style="object-fit: contain; border-radius: 10px; border: 1px solid #2b8025"
-            />
-            <img
-              v-else
-              src="@/assets/images/default.png"
-              class="image-order"
-              width="410"
-              height="410"
-              @click="showLightbox(defaultImage)"
-              alt="Фото по умолчанию"
-            />
-          </div> -->
-
           <div class="carousel-container">
             <div class="carousel">
               <template v-if="allPhotos.length > 0">
@@ -171,52 +150,7 @@
             />
             <label for="add-photos" class="btn custom-btn">Добавить фото</label>
           </div>
-          <!-- <div class="carousel">
-            <template v-if="allPhotos.length > 0">
-              <img
-                v-for="(photo, index) in allPhotos"
-                :key="index"
-                :src="checkPhoto(photo.url)"
-                class="image-order"
-                :alt="'Фото объявления ' + (index + 1)"
-                @click="showLightbox(photo.url)"
-                style="object-fit: contain; border-radius: 10px; border: 1px solid #2b8025"
-              />
-            </template>
-            <img
-              v-else
-              :src="defaultImage"
-              class="image-order"
-              width="410"
-              height="410"
-              @click="showLightbox(defaultImage)"
-              alt="Фото по умолчанию"
-            />
-          </div>
-          <div class="slider-container">
-            <button class="btn custom-btn" @click="previousSlide">❮ предыдущая фотография</button>
-            <button class="btn custom-btn" @click="nextSlide">следующая фотография ❯</button>
-          </div> -->
-
-          <!-- <div class="photo-management">
-            <input
-              type="file"
-              id="add-photos"
-              accept=".jpg, .jpeg, .png"
-              multiple
-              @change="handleNewPhotos"
-              style="display: none"
-            />
-            <label for="add-photos" class="btn custom-btn">Добавить фото</label>
-            <button
-              v-if="photos.length > 0"
-              class="btn custom-btn delete-btn"
-              @click="deleteCurrentPhoto"
-            >
-              Удалить текущее фото
-            </button>
-          </div> -->
-          <!-- </div> -->
+         
           <p style="font-size: 25px; font-weight: 500">Город: {{ ad.location || 'Не указан' }}</p>
           <p style="font-size: 25px; font-weight: 500">
             Категория: {{ ad.category || 'Не указана' }}
@@ -304,6 +238,7 @@ export default {
       const combined = []
       if (this.ad.photo) {
         combined.push({
+          id: this.ad.id,
           url: this.ad.photo,
           isMain: true,
         })
@@ -312,6 +247,7 @@ export default {
         this.photos.forEach((photo) => {
           if (!this.ad.photo || photo.photo !== this.ad.photo) {
             combined.push({
+              id: photo.id,
               url: photo.photo,
               isMain: false,
             })
@@ -492,38 +428,7 @@ export default {
         console.error('Исключение:', e)
       }
     },
-    // async createPhoto() {
-    //   const token = localStorage.getItem('jwt')
-    //   if (!token) {
-    //     this.error = 'Вы не авторизованы'
-    //     this.$router.push('/login')
-    //     return
-    //   }
-    //   const formData = new FormData()
-    //   formData.append('adId', this.ad.id)
-    //   formData.append('photoFIles', this.newPhotos)
-    //   try {
-    //     const response = await fetch(`http://localhost:8080/api/photos/create`, {
-    //       method: 'POST',
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //       body: formData,
-    //     })
-    //     if (response.ok) {
-    //       const photos = await response.json()
-    //       this.fetchAllPhoto()
-    //       this.newPhotos = []
-    //     } else {
-    //       const errorText = await response.text()
-    //       this.error = 'Ошибка добавления новых фотографий: ' + response.status + ' - ' + errorText
-    //       console.error('Ошибка сервера:', errorText)
-    //     }
-    //   } catch (e) {
-    //     this.error = 'Ошибка сервера при добавлении фотографий'
-    //     console.error('Исключение:', e)
-    //   }
-    // },
+    
     async createPhoto() {
       const token = localStorage.getItem('jwt')
       if (!token) {
@@ -570,6 +475,7 @@ export default {
       }
     },
     async deletePhoto(photoId) {
+      console.log(photoId)
       const token = localStorage.getItem('jwt')
       if (!token) {
         this.error = 'Вы не авторизованы'
@@ -586,7 +492,7 @@ export default {
         if (response.ok) {
           this.error = ''
           // this.closeDialog('#deleting')
-          this.fetchAllPhoto()
+          this.fetchAd()
         } else if (response.status === 403) {
           this.error = 'Вы не можете удалить эту фотографию'
         } else if (response.status === 404) {

@@ -7,38 +7,34 @@
         <div class="col-md-9">
           <div class="margin"></div>
           <h2 class="head">{{ ad.title }}</h2>
-          <!-- <div style="width: 100%; border-radius: 10px; border: 1px solid #2b8025; height: 450px;"> -->
-          <img
-            v-if="ad.photo"
-            :src="checkPhoto(ad.photo)"
-            class="image-order"
-            alt="Фото объявления"
-            @click="showLightbox(ad.photo)"
-            style="
-              object-fit: fill;
-              max-width: 80%;
-              max-height: 50%;
-              border-radius: 10px;
-              border: 1px solid #2b8025;
-            "
-          />
-          <img
-            v-else
-            src="@/assets/images/default.png"
-            class="image-order"
-            width="410"
-            height="410"
-            @click="showLightbox(defaultImage)"
-            alt="Фото по умолчанию"
-          />
-          <!-- </div> -->
+          <div class="carousel-container">
+            <div class="carousel">
+              <template v-if="allPhotos.length > 0">
+                <div v-for="(photo, index) in allPhotos" :key="index" class="photo-container">
+                  <img
+                    :src="checkPhoto(photo.url)"
+                    class="image-order"
+                    :alt="'Фото объявления ' + (index + 1)"
+                    @click="showLightbox(photo.url)"
+                  />
+                </div>
+              </template>
+              <img
+                v-else
+                :src="defaultImage"
+                class="image-order"
+                @click="showLightbox(defaultImage)"
+                alt="Фото по умолчанию"
+              />
+            </div>
+          </div>
           <p style="font-size: 25px; font-weight: 500">Город: {{ ad.location || 'Не указан' }}</p>
           <p style="font-size: 25px; font-weight: 500">
             Категория: {{ ad.category || 'Не указана' }}
           </p>
           <p style="font-size: 25px">{{ ad.description }}</p>
           <p style="font-size: 35px; font-weight: 500">{{ ad.price }} &#8381;</p>
-          <button type="button" class="btn custom-btn" style="height: 40px" @click="createOrder">
+          <button  type="button" class="btn custom-btn" style="height: 40px" @click="createOrder">
             Добавить в свои заказы
           </button>
           <div style="font-size: 25px">
@@ -113,6 +109,7 @@ export default {
           avatarUrl: '',
         },
       },
+      photos: [],
       loading: false,
       error: null,
       serverBaseUrl: 'http://localhost:8080',
@@ -120,6 +117,7 @@ export default {
       defaultImage,
       lightboxVisible: false,
       currentImage: '',
+      check: false
     }
   },
   props: {
@@ -130,6 +128,28 @@ export default {
   },
   computed: {
     ...mapState(useUserStore, ['user']),
+    allPhotos() {
+      const combined = []
+      if (this.ad.photo) {
+        combined.push({
+          id: this.ad.id,
+          url: this.ad.photo,
+          isMain: true,
+        })
+      }
+      if (this.photos.length > 0) {
+        this.photos.forEach((photo) => {
+          if (!this.ad.photo || photo.photo !== this.ad.photo) {
+            combined.push({
+              id: photo.id,
+              url: photo.photo,
+              isMain: false,
+            })
+          }
+        })
+      }
+      return combined
+    },
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
@@ -149,11 +169,45 @@ export default {
         }
 
         this.ad = await response.json()
+        this.fetchAllPhoto()
       } catch (error) {
         this.error = error.message
         console.error('Ошибка:', error)
       } finally {
         this.loading = false
+      }
+    },
+    async fetchAllPhoto() {
+      const token = localStorage.getItem('jwt')
+      console.log(this.ad.id)
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/photos/adPhotos')
+        url.searchParams.append('adId', this.ad.id)
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.photos = await response.json()
+          console.log(this.photos)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки фотографий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
       }
     },
     async createOrder() {
@@ -210,3 +264,42 @@ export default {
   },
 }
 </script>
+
+
+<style scoped>
+.error {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.carousel-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 10px 0;
+}
+
+.carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+  scroll-snap-type: x mandatory;
+}
+
+.photo-container {
+  position: relative;
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+}
+
+.image-order {
+  width: 300px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #2b8025;
+  cursor: pointer;
+ }
+
+</style>
