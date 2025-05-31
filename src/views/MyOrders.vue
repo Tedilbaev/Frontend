@@ -5,7 +5,6 @@
     <div class="container" id="app">
       <div class="row">
         <User />
-
         <div class="col-md-9">
           <h1 class="head">Мои заказы:</h1>
           <input type="radio" value="all" checked class="radiobutton" name="type-ord" />Все
@@ -14,7 +13,6 @@
           <div class="create-line"></div>
           <form style="height: 70px">
             <div id="qqqq">
-              <!-- <div > -->
               <button type="button" class="btn custom-btn" @click="fetchUserOrders('title', 'asc')">
                 А-Я
               </button>
@@ -32,8 +30,6 @@
               >
                 Сначала новые
               </button>
-              <!-- </div> -->
-              <!-- <div> -->
               <button
                 type="button"
                 class="btn custom-btn"
@@ -48,7 +44,6 @@
               >
                 Сначала дорогие
               </button>
-              <!-- </div> -->
               <button type="button" class="btn custom-btn" @click="fetchUserOrders('price', 'asc')">
                 Сначала дешевые
               </button>
@@ -207,8 +202,12 @@ export default {
       })
     },
     goToOrder(adId) {
-      this.$router.push({ name: 'AdInfo', params: { id: adId } })
-    },
+    this.$router.push({ 
+      name: 'AdInfo', 
+      params: { id: adId },
+      query: { from: 'myorders' }
+    });
+  },
   },
   mounted() {
     this.fetchUserProfile()

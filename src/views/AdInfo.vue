@@ -34,7 +34,22 @@
           </p>
           <p style="font-size: 25px">{{ ad.description }}</p>
           <p style="font-size: 35px; font-weight: 500">{{ ad.price }} &#8381;</p>
-          <button  type="button" class="btn custom-btn" style="height: 40px" @click="createOrder">
+          <button 
+            v-if="isFromMyOrders" 
+            type="button" 
+            class="btn custom-btn" 
+            style="height: 40px" 
+            @click="payOrder"
+          >
+            Оплатить заказ
+          </button>
+          <button 
+            v-else-if="!isFromAllAds" 
+            type="button" 
+            class="btn custom-btn" 
+            style="height: 40px" 
+            @click="createOrder"
+          >
             Добавить в свои заказы
           </button>
           <div style="font-size: 25px">
@@ -109,6 +124,7 @@ export default {
           avatarUrl: '',
         },
       },
+      currentUser: null,
       photos: [],
       loading: false,
       error: null,
@@ -149,6 +165,12 @@ export default {
         })
       }
       return combined
+    },
+    isFromMyOrders() {
+      return this.$route.query.from === 'myorder';
+    },
+    isFromAllAds() {
+      return this.$route.query.from === 'allads';
     },
   },
   methods: {
@@ -210,6 +232,7 @@ export default {
         console.error('Исключение:', e)
       }
     },
+    
     async createOrder() {
       const token = localStorage.getItem('jwt')
       if (!token) {

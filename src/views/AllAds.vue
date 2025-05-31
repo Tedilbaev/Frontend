@@ -120,7 +120,7 @@
           <div class="table-order" v-else-if="ads && ads.length > 0 && searchQuery">
             <template v-for="ad in ads" :key="ad.id">
               <div
-                v-if="ad.location == searchQuery"
+                v-if="ad.location == searchQuery && this.user.id != ad.user.id"
                 class="order"
                 style="position: relative"
                 @click="goToAd(ad.id)"
@@ -205,7 +205,9 @@ export default {
       searchTitle: '',
     }
   },
-
+  computed: {
+    ...mapState(useUserStore, ['user'])
+  },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
     async fetchAllAds(sortBy = 'createdAt', order = 'desc', title = this.searchTitle) {
