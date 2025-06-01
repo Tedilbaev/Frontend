@@ -31,32 +31,24 @@
           <div class="create-line"></div>
           <form style="height: 70px">
             <div id="qqqq">
-              <!-- <div > -->
-              <button type="button" class="btn custom-btn" @click="fetchAllAds('title', 'asc')">
+              <button type="button" class="btn custom-btn" @click="sortAds('title', 'asc')">
                 А-Я
               </button>
-              <button
-                type="button"
-                class="btn custom-btn"
-                @click="fetchAllAds('createdAt', 'desc')"
-              >
+              <button type="button" class="btn custom-btn" @click="sortAds('createdAt', 'desc')">
                 Сначала новые
               </button>
-              <button type="button" class="btn custom-btn" @click="fetchAllAds('price', 'asc')">
+              <button type="button" class="btn custom-btn" @click="sortAds('price', 'asc')">
                 Сначала дешевые
               </button>
-              <!-- </div> -->
-              <!-- <div> -->
-              <button type="button" class="btn custom-btn" @click="fetchAllAds('title', 'desc')">
+              <button type="button" class="btn custom-btn" @click="sortAds('title', 'desc')">
                 Я-А
               </button>
-              <button type="button" class="btn custom-btn" @click="fetchAllAds('createdAt', 'asc')">
+              <button type="button" class="btn custom-btn" @click="sortAds('createdAt', 'asc')">
                 Сначала старые
               </button>
-              <button type="button" class="btn custom-btn" @click="fetchAllAds('price', 'desc')">
+              <button type="button" class="btn custom-btn" @click="sortAds('price', 'desc')">
                 Сначала дорогие
               </button>
-              <!-- </div> -->
             </div>
             <div id="pppp">
               <input
@@ -203,16 +195,28 @@ export default {
       filteredCities: [],
       defaultImage,
       searchTitle: '',
+      currentPage: 0,
+      totalPages: 0,
+      currentSortBy: 'createdAt',
+      currentOrder: 'desc',
+      isLoading: false,
     }
   },
   computed: {
-    ...mapState(useUserStore, ['user'])
+    ...mapState(useUserStore, ['user']),
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchAllAds(sortBy = 'createdAt', order = 'desc', title = this.searchTitle) {
+    async fetchAllAds(
+      sortBy = this.currentSortBy,
+      order = this.currentOrder,
+      title = this.searchTitle,
+      page = this.currentPage,
+    ) {
+      if (this.isLoading) return
+
+      this.isLoading = true
       const token = localStorage.getItem('jwt')
-      console.log('Токен для объявлений:', token)
       if (!token) {
         this.error = 'Вы не авторизованы'
         this.$router.push('/login')
@@ -222,6 +226,8 @@ export default {
         const url = new URL(`${this.apiBaseUrl}/all`)
         url.searchParams.append('sortBy', sortBy)
         url.searchParams.append('order', order)
+        url.searchParams.append('page', page)
+        url.searchParams.append('size', 12)
         if (title) {
           url.searchParams.append('title', title)
         }
@@ -233,23 +239,45 @@ export default {
             Authorization: `Bearer ${token}`,
           },
         })
+
         if (response.ok) {
-          this.ads = await response.json()
+          const data = await response.json()
+          this.totalPages = data.totalPages
+
+          if (page === 0) {
+            this.ads = data.content
+          } else {
+            this.ads = [...this.ads, ...data.content]
+          }
+
           this.ads = this.ads.map((ad) => ({
             ...ad,
             photo: this.checkPhoto(ad.photo),
           }))
-          console.log('Объявления:', this.ads)
-        } else if (response.status === 401 || response.status === 403) {
-          this.error = 'Сессия истекла или доступ запрещен'
-          localStorage.removeItem('jwt')
-          this.$router.push('/login')
         } else {
           this.error = 'Ошибка загрузки объявлений: ' + response.status
         }
       } catch (e) {
         this.error = 'Ошибка сервера'
         console.error('Исключение:', e)
+      } finally {
+        this.isLoading = false
+      }
+    },
+    sortAds(sortBy, order) {
+      this.currentSortBy = sortBy
+      this.currentOrder = order
+      this.currentPage = 0
+      this.fetchAllAds(sortBy, order, this.searchTitle, 0)
+    },
+    searchByTitle() {
+      this.currentPage = 0
+      this.fetchAllAds(this.currentSortBy, this.currentOrder, this.searchTitle, 0)
+    },
+    loadMore() {
+      if (this.currentPage < this.totalPages - 1) {
+        this.currentPage++
+        this.fetchAllAds()
       }
     },
     checkPhoto(photoUrl) {
@@ -258,12 +286,9 @@ export default {
       }
 
       if (photoUrl.startsWith('/userData/')) {
-        const fullUrl = `${this.serverBaseUrl}${photoUrl}`
-        console.log('Серверный URL фото:', fullUrl)
-        return fullUrl
+        return `${this.serverBaseUrl}${photoUrl}`
       }
 
-      console.log('Локальный URL фото:', photoUrl)
       return photoUrl
     },
     formatDate(dateString) {
@@ -296,9 +321,6 @@ export default {
     goToAd(adId) {
       this.$router.push({ name: 'AdInfo', params: { id: adId } })
     },
-    searchByTitle() {
-      this.fetchAllAds('createdAt', 'desc', this.searchTitle)
-    },
     handleScroll() {
       const btnUp = document.querySelector('.btn-up')
       if (window.scrollY > 300) {
@@ -319,19 +341,26 @@ export default {
   },
   mounted() {
     this.fetchUserProfile()
-    this.fetchAllAds('createdAt', 'desc')
+    this.fetchAllAds()
     window.addEventListener('scroll', this.handleScroll)
-    const btnUp = document.querySelector('.btn-up')
-    if (btnUp) {
-      btnUp.addEventListener('click', this.scrollToTop)
-    }
-  },
-  beforeUnmount() {
-    window.removeEventListener('scroll', this.handleScroll)
-    const btnUp = document.querySelector('.btn-up')
-    if (btnUp) {
-      btnUp.removeEventListener('click', this.scrollToTop)
-    }
+
+    let isScrolling = false
+    window.addEventListener('scroll', () => {
+      if (isScrolling) return
+      isScrolling = true
+      const scrollPosition = window.innerHeight + window.scrollY
+      const pageHeight = document.documentElement.scrollHeight || document.body.scrollHeight
+      const threshold = 400
+      if (
+        scrollPosition >= pageHeight - threshold &&
+        !this.isLoading &&
+        this.currentPage < this.totalPages - 1
+      ) {
+        this.loadMore()
+      }
+
+      isScrolling = false
+    })
   },
 }
 </script>

@@ -110,8 +110,8 @@
           <option value="name" selected="selected">Название</option>
           <option value="type">Тип услуги</option>
         </select>
-        <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px; overflow-x: hidden;">
-          <table class="table table-striped w-100" id="myTable">
+        <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px; overflow-x: hidden;" ref="adsTable">
+          <table class="table table-striped w-100" id="adsTable">
             <thead>
               <tr>
                 <th scope="col" style="font-size: 15px;">№</th>
@@ -134,19 +134,21 @@
             </tbody>
           </table>
         </div>
+        <div class="text-center" style="margin-top: 15px;" v-if="isLoading">
+          <p>Загрузка...</p>
+        </div>
       </div>
   
         <div class="col-md-5">
           <h1 class="head">Заказы:</h1>
           <div style="margin: 10px 0 12px 0">
-            <input id="all" type="button" class="btn custom-btn" value="Все"></input>
-            <input id="active" type="button" class="btn custom-btn" value="Активно"></input>
-            <input id="finished" type="button" class="btn custom-btn" value="Завершено"></input>
-            <input id="declined" type="button" class="btn custom-btn" value="Отклонено"></input>
+            <input id="all" type="button" class="btn custom-btn" value="Все" @click="filterOrders('all')"></input>
+            <input id="active" type="button" class="btn custom-btn" value="Активно" @click="filterOrders('Активно')"></input>
+            <input id="finished" type="button" class="btn custom-btn" value="Завершено" @click="filterOrders('Завершено')"></input>
+            <input id="declined" type="button" class="btn custom-btn" value="Отклонено" @click="filterOrders('Отклонено')"></input>
           </div>
-          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
-          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
-            <table class="table table-striped w-100" id="myTable1">
+          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px" ref="ordersTable">
+            <table class="table table-striped w-100" id="ordersTable">
               <thead>
                 <tr>
                   <th scope="col" style="font-size: 15px;">№</th>
@@ -170,8 +172,11 @@
               </tbody>
             </table>
           </div>
+          <div class="text-center" style="margin-top: 15px;" v-if="isLoadingOrders">
+            <p>Загрузка...</p>
+          </div>
         </div>
-      </div>
+      
       <div class="row" style="display: flex; justify-content: center;">
         <div v-if="user?.role === 'ADMIN'" class="col-md-5">
           <h1 class="head">Пользователи:</h1>
@@ -318,6 +323,19 @@ export default {
       previewImage: null,
       currentAd: { id: null, title: '', description: '', price: '', category: '', photo: '' },
       defaultImage,
+      currentPage: 0,
+      totalPages: 0,
+      pageSize: 15,
+      currentSortBy: 'createdAt',
+      currentOrder: 'asc',
+      isLoading: false,
+      currentPageOrders: 0,
+      totalPagesOrders: 0,
+      pageSizeOrders: 15,
+      currentSortByOrders: 'createdAt',
+      currentOrderOrders: 'asc',
+      isLoadingOrders: false,
+      orderStatusFilter: 'all',
     }
   },
   computed: {
@@ -325,17 +343,22 @@ export default {
   },
   methods: {
     ...mapActions(useUserStore, ['fetchUserProfile']),
-    async fetchAllAds(sortBy = 'createdAt', order = 'desc', query = '', type = this.searchType) {
+    async fetchAllAds(sortBy = this.currentSortBy, order = this.currentOrder, query = '', type = this.searchType, page = this.currentPage) {
+      if (this.isLoading) return
+      this.isLoading = true
       const token = localStorage.getItem('jwt')
       if (!token) {
         this.error = 'Вы не авторизованы'
         this.$router.push('/login')
+        this.isLoading = false
         return
       }
       try {
         const url = new URL(`${this.apiBaseUrl}/all`)
         url.searchParams.append('sortBy', sortBy)
         url.searchParams.append('order', order)
+        url.searchParams.append('page', page)
+        url.searchParams.append('size', this.pageSize)
         if (query && type === 'name') {
           url.searchParams.append('title', query)
         } else if (query && type === 'type') {
@@ -350,7 +373,13 @@ export default {
           },
         })
         if (response.ok) {
-          this.ads = await response.json()
+          const data = await response.json()
+          this.totalPages = data.totalPages
+          if (page === 0) {
+            this.ads = data.content
+          } else {
+            this.ads = [...this.ads, ...data.content]
+          }
           this.ads = this.ads.map((ad) => ({
             ...ad,
             photo: this.checkPhoto(ad.photo),
@@ -365,6 +394,8 @@ export default {
       } catch (e) {
         this.error = 'Ошибка сервера'
         console.error('Исключение:', e)
+      } finally {
+        this.isLoading = false
       }
     },
     async fetchAllUsers(sortBy = 'createdAt', order = 'desc', query = '', type = this.userSearchType) {
@@ -486,20 +517,26 @@ export default {
         console.error('Исключение:', e)
       }
     },
-    async fetchAllOrders(sortBy = 'createdAt', order = 'desc', title = this.orderSearchTitle) {
+    async fetchAllOrders(sortBy = this.currentSortByOrders, order = this.currentOrderOrders, title = this.orderSearchTitle, page = this.currentPageOrders) {
+      if (this.isLoadingOrders) return
+      this.isLoadingOrders = true
       const token = localStorage.getItem('jwt')
       if (!token) {
         this.error = 'Вы не авторизованы'
         this.$router.push('/login')
+        this.isLoadingOrders = false
         return
       }
       try {
         const url = new URL(`http://localhost:8080/api/orders/all`)
         url.searchParams.append('sortBy', sortBy)
         url.searchParams.append('order', order)
+        url.searchParams.append('page', page)
+        url.searchParams.append('size', this.pageSizeOrders)
         if (title) {
           url.searchParams.append('title', title)
         }
+
         const response = await fetch(url, {
           method: 'GET',
           headers: {
@@ -508,22 +545,33 @@ export default {
           },
         })
         if (response.ok) {
-          this.orders = await response.json()
+          const data = await response.json()
+          this.totalPagesOrders = data.totalPages
+          let orders = data.content
+          if (this.orderStatusFilter !== 'all') {
+            orders = orders.filter(order => order.status === this.orderStatusFilter)
+          }
+          if (page === 0) {
+            this.orders = orders
+          } else {
+            this.orders = [...this.orders, ...orders]
+          }
           this.orders = this.orders.map((order) => ({
             ...order,
-            photo: this.checkPhoto(order.ad.photo),
+            photo: this.checkPhoto(order.ad?.photo),
           }))
-          console.log(this.orders)
         } else if (response.status === 401 || response.status === 403) {
           this.error = 'Сессия истекла или доступ запрещен'
           localStorage.removeItem('jwt')
           this.$router.push('/login')
         } else {
-          this.error = 'Ошибка загрузки заказа: ' + response.status
+          this.error = 'Ошибка загрузки заказов: ' + response.status
         }
       } catch (e) {
         this.error = 'Ошибка сервера'
         console.error('Исключение:', e)
+      } finally {
+        this.isLoadingOrders = false
       }
     },
     async createСategory() {
@@ -716,7 +764,8 @@ export default {
       document.querySelector(dialogwindow).close()
     },
     search() {
-      this.fetchAllAds('createdAt', 'asc', this.searchQuery, this.searchType)
+      this.currentPage = 0
+      this.fetchAllAds(this.currentSortBy, this.currentOrder, this.searchQuery, this.searchType, 0)
     },
     searchUser() {
       this.fetchAllUsers('createdAt', 'asc', this.userSearchQuery, this.userSearchType)
@@ -726,7 +775,24 @@ export default {
     },
     searchCategory() {
       this.fetchAllCategory('createdAt', 'asc', this.categorySearchQuery)
-    }
+    },
+    filterOrders(status) {
+      this.orderStatusFilter = status
+      this.currentPageOrders = 0
+      this.fetchAllOrders(this.currentSortByOrders, this.currentOrderOrders, this.orderSearchTitle, 0)
+    },
+    loadMore() {
+      if (this.currentPage < this.totalPages - 1) {
+        this.currentPage++
+        this.fetchAllAds(this.currentSortBy, this.currentOrder, this.searchQuery, this.searchType, this.currentPage)
+      }
+    },
+    loadMoreOrders() {
+      if (this.currentPageOrders < this.totalPagesOrders - 1) {
+        this.currentPageOrders++
+        this.fetchAllOrders(this.currentSortByOrders, this.currentOrderOrders, this.orderSearchTitle, this.currentPageOrders)
+      }
+    },
   },
   mounted() {
     this.fetchAllAds("createdAt", "asc")
@@ -735,6 +801,50 @@ export default {
     this.fetchAllCategory('createdAt', 'asc')
     this.fetchAllOrders('createdAt', 'asc')
     this.fetchUserProfile()
+
+    const adsTable = this.$refs.adsTable
+    if (adsTable) {
+      let isScrolling = false
+      adsTable.addEventListener('scroll', () => {
+        if (isScrolling) return
+        isScrolling = true
+        const scrollPosition = adsTable.scrollTop + adsTable.clientHeight
+        const tableHeight = adsTable.scrollHeight
+        const threshold = 50
+        if (
+          scrollPosition >= tableHeight - threshold &&
+          !this.isLoading &&
+          this.currentPage < this.totalPages - 1
+        ) {
+          this.loadMore()
+        }
+        setTimeout(() => {
+          isScrolling = false
+        }, 200)
+      })
+    }
+
+    const ordersTable = this.$refs.ordersTable
+    if (ordersTable) {
+      let isScrollingOrders = false
+      ordersTable.addEventListener('scroll', () => {
+        if (isScrollingOrders) return
+        isScrollingOrders = true
+        const scrollPosition = ordersTable.scrollTop + ordersTable.clientHeight
+        const tableHeight = ordersTable.scrollHeight
+        const threshold = 400
+        if (
+          scrollPosition >= tableHeight - threshold &&
+          !this.isLoadingOrders &&
+          this.currentPageOrders < this.totalPagesOrders - 1
+        ) {
+          this.loadMoreOrders()
+        }
+        setTimeout(() => {
+          isScrollingOrders = false
+        }, 200)
+      })
+    }
   }
 }
 </script>
