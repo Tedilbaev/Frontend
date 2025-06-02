@@ -1,6 +1,21 @@
 <template>
   <Header />
   <main>
+     <div class="holder" style="overflow-y: hidden">
+      <dialog class="replenishpopup" style="overflow-y: hidden; height: 25%; top: 30%" id="confirm">
+        <div class="content" style="overflow-y: hidden">
+          <h3 style="text-align: center">Оплата заказа прошла успешно</h3>
+          <div class="text-center">
+                         
+              <p style="margin-top: 30px;">
+            <button type="button" class="btn custom-btn" @click="goToAds">
+              Продолжить
+            </button>
+          </p>
+          </div>
+        </div>
+      </dialog>
+    </div>
     <div class="container">
       <div class="row">
         <User />
@@ -32,14 +47,14 @@
           <p style="font-size: 25px; font-weight: 500">
             Категория: {{ ad.category || 'Не указана' }}
           </p>
-          <p style="font-size: 25px">{{ ad.description }}</p>
+          <p style="font-size: 25px; word-wrap: break-word">{{ ad.description }}</p>
           <p style="font-size: 35px; font-weight: 500">{{ ad.price }} &#8381;</p>
           <button 
             v-if="isFromMyOrders" 
             type="button" 
             class="btn custom-btn" 
             style="height: 40px" 
-            @click="payOrder"
+            @click="payOrder(); showDialog('#confirm')"
           >
             Оплатить заказ
           </button>
@@ -167,7 +182,7 @@ export default {
       return combined
     },
     isFromMyOrders() {
-      return this.$route.query.from === 'myorder';
+      return this.$route.query.from === 'myorders';
     },
     isFromAllAds() {
       return this.$route.query.from === 'allads';
@@ -232,7 +247,64 @@ export default {
         console.error('Исключение:', e)
       }
     },
-    
+    async payOrder() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      this.error = ''
+      const formData = new FormData()
+      console.log(this.ad.user.id, this.ad.id, this.ad.price, this.user.id)
+      formData.append("userId",this.ad.user.id)
+      formData.append("orderId", this.ad.id.toString())
+      formData.append("amount",this.ad.price.toString())
+      const formData1 = new FormData()
+      formData1.append("userId",this.user.id)
+      formData1.append("orderId", this.ad.id.toString())
+      formData1.append("amount",this.ad.price.toString())
+      try {
+        const response = await fetch(`http://localhost:8080/api/balance/payment`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+        if (response.ok) {
+          this.error = ''
+          // this.closeDialog('#withdraw')
+          await this.fetchUserProfile() 
+        } else {
+          const errorText = await response.text()
+          this.error = `Ошибка обновления объявления: ${errorText}`
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при обновлении объявления'
+        console.error('Исключение:', e)
+      }
+      try {
+        const response1 = await fetch(`http://localhost:8080/api/balance/deposit`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData1,
+        })
+        if (response1.ok) {
+          this.error = ''
+          // this.closeDialog('#withdraw')
+          await this.fetchUserProfile() 
+        } else {
+          const errorText = await response1.text()
+          this.error = `Ошибка обновления объявления: ${errorText}`
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при обновлении объявления'
+        console.error('Исключение:', e)
+      }
+    },
     async createOrder() {
       const token = localStorage.getItem('jwt')
       if (!token) {
@@ -279,6 +351,20 @@ export default {
     showLightbox(imageUrl) {
       this.currentImage = this.checkPhoto(imageUrl)
       this.lightboxVisible = true
+    },
+    goToAds() {
+      this.$router.push({ name: 'MyOrders'})
+    },
+    showDialog(dialogwindow) {
+      document.querySelector(dialogwindow).showModal()
+      this.$nextTick(() => {
+        this.$forceUpdate()
+      })
+    },
+    closeDialog(dialogwindow) {
+      this.error = ''
+      this.previewImage = null
+      document.querySelector(dialogwindow).close()
     },
   },
   mounted() {

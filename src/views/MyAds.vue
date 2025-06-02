@@ -434,10 +434,22 @@ export default {
     },
     handleScroll() {
       const btnUp = document.querySelector('.btn-up')
-      if (window.scrollY > 300) {
-        btnUp.classList.remove('btn-up_hide')
-      } else {
-        btnUp.classList.add('btn-up_hide')
+      if (btnUp) {
+        if (window.scrollY > 300) {
+          btnUp.classList.remove('btn-up_hide')
+        } else {
+          btnUp.classList.add('btn-up_hide')
+        }
+      }
+      const scrollPosition = window.innerHeight + window.scrollY
+      const pageHeight = document.documentElement.scrollHeight || document.body.scrollHeight
+      const threshold = 400
+      if (
+        scrollPosition >= pageHeight - threshold &&
+        !this.isLoading &&
+        this.currentPage < this.totalPages - 1
+      ) {
+        this.loadMore()
       }
     },
     scrollToTop() {
@@ -472,6 +484,9 @@ export default {
 
       isScrolling = false
     })
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.handleScroll)
   },
 }
 </script>
