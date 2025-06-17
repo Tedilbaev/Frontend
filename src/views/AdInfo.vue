@@ -1,17 +1,14 @@
 <template>
   <Header />
   <main>
-     <div class="holder" style="overflow-y: hidden">
+    <div class="holder" style="overflow-y: hidden">
       <dialog class="replenishpopup" style="overflow-y: hidden; height: 25%; top: 30%" id="confirm">
         <div class="content" style="overflow-y: hidden">
           <h3 style="text-align: center">Оплата заказа прошла успешно</h3>
           <div class="text-center">
-                         
-              <p style="margin-top: 30px;">
-            <button type="button" class="btn custom-btn" @click="goToAds">
-              Продолжить
-            </button>
-          </p>
+            <p style="margin-top: 30px">
+              <button type="button" class="btn custom-btn" @click="goToAds">Продолжить</button>
+            </p>
           </div>
         </div>
       </dialog>
@@ -49,20 +46,20 @@
           </p>
           <p style="font-size: 25px; word-wrap: break-word">{{ ad.description }}</p>
           <p style="font-size: 35px; font-weight: 500">{{ ad.price }} &#8381;</p>
-          <button 
-            v-if="isFromMyOrders" 
-            type="button" 
-            class="btn custom-btn" 
-            style="height: 40px" 
-            @click="payOrder(); showDialog('#confirm')"
+          <button
+            v-if="isFromMyOrders"
+            type="button"
+            class="btn custom-btn"
+            style="height: 40px"
+            @click="(payOrder(), showDialog('#confirm'))"
           >
             Оплатить заказ
           </button>
-          <button 
-            v-else-if="!isFromAllAds" 
-            type="button" 
-            class="btn custom-btn" 
-            style="height: 40px" 
+          <button
+            v-else-if="!isFromAllAds"
+            type="button"
+            class="btn custom-btn"
+            style="height: 40px"
             @click="createOrder"
           >
             Добавить в свои заказы
@@ -148,7 +145,7 @@ export default {
       defaultImage,
       lightboxVisible: false,
       currentImage: '',
-      check: false
+      check: false,
     }
   },
   props: {
@@ -182,10 +179,10 @@ export default {
       return combined
     },
     isFromMyOrders() {
-      return this.$route.query.from === 'myorders';
+      return this.$route.query.from === 'myorders'
     },
     isFromAllAds() {
-      return this.$route.query.from === 'allads';
+      return this.$route.query.from === 'allads'
     },
   },
   methods: {
@@ -257,15 +254,15 @@ export default {
       this.error = ''
       const formData = new FormData()
       console.log(this.ad.user.id, this.ad.id, this.ad.price, this.user.id)
-      formData.append("userId",this.ad.user.id)
-      formData.append("orderId", this.ad.id.toString())
-      formData.append("amount",this.ad.price.toString())
+      formData.append('userId', this.ad.user.id)
+      formData.append('orderId', this.ad.id.toString())
+      formData.append('amount', this.ad.price.toString())
       const formData1 = new FormData()
-      formData1.append("userId",this.user.id)
-      formData1.append("orderId", this.ad.id.toString())
-      formData1.append("amount",this.ad.price.toString())
+      formData1.append('userId', this.user.id)
+      formData1.append('orderId', this.ad.id.toString())
+      formData1.append('amount', this.ad.price.toString())
       try {
-        const response = await fetch(`http://localhost:8080/api/balance/payment`, {
+        const response = await fetch(`http://localhost:8080/api/balance/deposit`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -275,7 +272,7 @@ export default {
         if (response.ok) {
           this.error = ''
           // this.closeDialog('#withdraw')
-          await this.fetchUserProfile() 
+          await this.fetchUserProfile()
         } else {
           const errorText = await response.text()
           this.error = `Ошибка обновления объявления: ${errorText}`
@@ -285,7 +282,7 @@ export default {
         console.error('Исключение:', e)
       }
       try {
-        const response1 = await fetch(`http://localhost:8080/api/balance/deposit`, {
+        const response1 = await fetch(`http://localhost:8080/api/balance/payment`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -295,7 +292,7 @@ export default {
         if (response1.ok) {
           this.error = ''
           // this.closeDialog('#withdraw')
-          await this.fetchUserProfile() 
+          await this.fetchUserProfile()
         } else {
           const errorText = await response1.text()
           this.error = `Ошибка обновления объявления: ${errorText}`
@@ -353,7 +350,7 @@ export default {
       this.lightboxVisible = true
     },
     goToAds() {
-      this.$router.push({ name: 'MyOrders'})
+      this.$router.push({ name: 'MyOrders' })
     },
     showDialog(dialogwindow) {
       document.querySelector(dialogwindow).showModal()
@@ -373,7 +370,6 @@ export default {
   },
 }
 </script>
-
 
 <style scoped>
 .error {
@@ -409,6 +405,5 @@ export default {
   border-radius: 10px;
   border: 1px solid #2b8025;
   cursor: pointer;
- }
-
+}
 </style>

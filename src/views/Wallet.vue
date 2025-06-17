@@ -7,39 +7,44 @@
           <h1 style="text-align: center">Пополнить счет</h1>
           <div class="text-center">
             <label for="amountReplen">Введите сумму пополнения</label>
-              <p>
-                <input
-                  v-model="amount"
-                  type="text"
-                  id="amountReplen"
-                  placeholder="Например: 1000.00"
-                  class="custom-text"
-                  style="width: 100%"
-                  maxlength="10"
-                />
-              </p>
-              <label for="сard">Введите сумму пополнения</label>
-              <p>
-                <input
-                  v-model="cardNumber"
-                  type="text"
-                  id="card"
-                  placeholder=""
-                  class="custom-text"
-                  style="width: 100%"
-                  maxlength="16"
-                  @keydown="filterInput"
-                />
-              </p>
-              <p style="margin: 0 0 10px 0;"  v-if="error === 'Номер карты должен содержать 16 символов'">Номер карты должен содержать 16 символов</p>
-              <p style="margin-top: 10px;">
-            <button type="button" class="btn custom-btn" @click="replenishBalance">
-              Пополнить
-            </button>
-            <button type="button" class="btn custom-btn" @click="closeDialog('#replenish')">
-              Отмена
-            </button>
-          </p>
+            <p>
+              <input
+                v-model="amount"
+                type="text"
+                id="amountReplen"
+                placeholder="Например: 1000.00"
+                class="custom-text"
+                style="width: 100%"
+                maxlength="10"
+              />
+            </p>
+            <label for="сard">Введите номер карты</label>
+            <p>
+              <input
+                v-model="cardNumber"
+                type="text"
+                id="card"
+                placeholder=""
+                class="custom-text"
+                style="width: 100%"
+                maxlength="16"
+                @keydown="filterInput"
+              />
+            </p>
+            <p
+              style="margin: 0 0 10px 0"
+              v-if="error === 'Номер карты должен содержать 16 символов'"
+            >
+              Номер карты должен содержать 16 символов
+            </p>
+            <p style="margin-top: 10px">
+              <button type="button" class="btn custom-btn" @click="replenishBalance">
+                Пополнить
+              </button>
+              <button type="button" class="btn custom-btn" @click="closeDialog('#replenish')">
+                Отмена
+              </button>
+            </p>
           </div>
         </div>
       </dialog>
@@ -50,39 +55,42 @@
           <h1 style="text-align: center">Cнять с счета</h1>
           <div class="text-center">
             <label for="amountWithdraw">Введите сумму снятия</label>
-              <p>
-                <input
-                  v-model="amount"
-                  type="text"
-                  id="amountWithdraw"
-                  placeholder="Например: 1000.00"
-                  class="custom-text"
-                  style="width: 100%"
-                  maxlength="10"
-                />
-              </p>
-              <label for="card">Введите сумму пополнения</label>
-              <p>
-                <input
-                  v-model="cardNumber"
-                  type="text"
-                  id="card"
-                  placeholder=""
-                  class="custom-text"
-                  style="width: 100%"
-                  maxlength="16"
-                  @keydown="filterInput"
-                />
-              </p>
-              <p style="margin: 0 0 10px 0;"  v-if="error === 'Номер карты должен содержать 16 символов'">Номер карты должен содержать 16 символов</p>
-              <p style="margin-top: 10px;">
-            <button type="button" class="btn custom-btn" @click="withdrawBalance">
-              Снять
-            </button>
-            <button type="button" class="btn custom-btn" @click="closeDialog('#withdraw')">
-              Отмена
-            </button>
-          </p>
+            <p>
+              <input
+                v-model="amount"
+                type="text"
+                id="amountWithdraw"
+                placeholder="Например: 1000.00"
+                class="custom-text"
+                style="width: 100%"
+                maxlength="10"
+              />
+            </p>
+            <label for="card">Введите номер карты</label>
+            <p>
+              <input
+                v-model="cardNumber"
+                type="text"
+                id="card"
+                placeholder=""
+                class="custom-text"
+                style="width: 100%"
+                maxlength="16"
+                @keydown="filterInput"
+              />
+            </p>
+            <p
+              style="margin: 0 0 10px 0"
+              v-if="error === 'Номер карты должен содержать 16 символов'"
+            >
+              Номер карты должен содержать 16 символов
+            </p>
+            <p style="margin-top: 10px">
+              <button type="button" class="btn custom-btn" @click="withdrawBalance">Снять</button>
+              <button type="button" class="btn custom-btn" @click="closeDialog('#withdraw')">
+                Отмена
+              </button>
+            </p>
           </div>
         </div>
       </dialog>
@@ -96,35 +104,52 @@
           <h2 v-if="user.balance" class="head">{{ user.balance }} &#8381;</h2>
           <h2 v-else class="head">0 &#8381;</h2>
           <p>
-            <button type="button" class="btn custom-btn" @click="showDialog('#replenish')">Пополнить счет</button>
-            <button type="button" class="btn custom-btn" @click="showDialog('#withdraw')">Снять с счета</button>
+            <button type="button" class="btn custom-btn" @click="showDialog('#replenish')">
+              Пополнить счет
+            </button>
+            <button type="button" class="btn custom-btn" @click="showDialog('#withdraw')">
+              Снять с счета
+            </button>
           </p>
           <h4 class="head">История операций:</h4>
-          <div class="table-responsive table-scroll mb-0 styling" data-mdb-perfect-scrollbar="true" style="position: relative; height: 550px">
-           <table class="table table-striped w-100 text-center">
-            <thead>
-              <tr>
-                <th scope="col">№</th>
-                <th scope="col">Тип операции</th>
-                <th scope="col">Источник/адресат</th>
-                <th scope="col">Дата</th>
-                <th scope="col">Сумма операции (в &#8381;)</th>
-              </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(transaction, index) in transactions" :key="transaction.id">
-                <td>{{ index + 1 }}</td>
-                <td>{{ transaction.type }}</td>
-                <td v-if="transaction.type == 'Списание' || transaction.type == 'Пополнение' ">{{ transaction.cardNumber }}</td>
-                <td v-else-if="transaction.type == 'Оплата заказа' || transaction.type == 'Зачисление за заказ' "> {{ transaction.user.id }}</td>
-                <td>{{ formatDate(transaction.createdAt) }}</td>
-                <td>{{ formatBalance(transaction.amount) }}</td>
-              </tr>
-              <tr v-if="transactions.length === 0">
-                <td colspan="5">Нет операций</td>
-              </tr>
-            </tbody>
-          </table>
+          <div
+            class="table-responsive table-scroll mb-0 styling"
+            data-mdb-perfect-scrollbar="true"
+            style="position: relative; height: 550px"
+          >
+            <table class="table table-striped w-100 text-center">
+              <thead>
+                <tr>
+                  <th scope="col">№</th>
+                  <th scope="col">Тип операции</th>
+                  <th scope="col">Источник/адресат</th>
+                  <th scope="col">Дата</th>
+                  <th scope="col">Сумма операции (в &#8381;)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(transaction, index) in transactions" :key="transaction.id">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ transaction.type }}</td>
+                  <td v-if="transaction.type == 'Списание' || transaction.type == 'Пополнение'">
+                    {{ transaction.cardNumber }}
+                  </td>
+                  <td
+                    v-else-if="
+                      transaction.type == 'Оплата заказа' ||
+                      transaction.type == 'Зачисление за заказ'
+                    "
+                  >
+                    {{ transaction.user.id }}
+                  </td>
+                  <td>{{ formatDate(transaction.createdAt) }}</td>
+                  <td>{{ formatBalance(transaction.amount) }}</td>
+                </tr>
+                <tr v-if="transactions.length === 0">
+                  <td colspan="5">Нет операций</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -203,8 +228,8 @@ export default {
     },
     async withdrawBalance() {
       if (this.cardNumber.length !== 16) {
-        this.error = 'Номер карты должен содержать 16 символов';
-        return;
+        this.error = 'Номер карты должен содержать 16 символов'
+        return
       }
       if (!this.amount || this.amount <= 0 || this.amount > this.transactions.amount) {
         this.error = 'Введите корректную сумму'
@@ -220,9 +245,9 @@ export default {
       console.log(this.user.id)
       console.log(this.amount)
       const formData = new FormData()
-      formData.append("userId",this.user.id)
-      formData.append("amount",this.amount)
-      formData.append("cardNumber", this.cardNumber)
+      formData.append('userId', this.user.id)
+      formData.append('amount', this.amount)
+      formData.append('cardNumber', this.cardNumber)
       console.log(formData)
       try {
         const response = await fetch(`http://localhost:8080/api/balance/withdraw`, {
@@ -236,8 +261,8 @@ export default {
         if (response.ok) {
           this.error = ''
           this.closeDialog('#withdraw')
-          await this.fetchUserProfile() 
-          await this.fetchOperations() 
+          await this.fetchUserProfile()
+          await this.fetchOperations()
           this.amount = 0
           this.cardNumber = ''
         } else {
@@ -251,8 +276,8 @@ export default {
     },
     async replenishBalance() {
       if (this.cardNumber.length !== 16) {
-        this.error = 'Номер карты должен содержать 16 символов';
-        return;
+        this.error = 'Номер карты должен содержать 16 символов'
+        return
       }
       if (!this.amount || this.amount <= 0) {
         this.error = 'Введите корректную сумму'
@@ -268,9 +293,9 @@ export default {
       console.log(this.user.id)
       console.log(this.amount)
       const formData = new FormData()
-      formData.append("userId",this.user.id)
-      formData.append("amount",this.amount)
-      formData.append("cardNumber", this.cardNumber)
+      formData.append('userId', this.user.id)
+      formData.append('amount', this.amount)
+      formData.append('cardNumber', this.cardNumber)
       try {
         const response = await fetch(`http://localhost:8080/api/balance/replenish`, {
           method: 'POST',
@@ -283,8 +308,8 @@ export default {
         if (response.ok) {
           this.error = ''
           this.closeDialog('#replenish')
-          await this.fetchUserProfile() 
-          await this.fetchOperations() 
+          await this.fetchUserProfile()
+          await this.fetchOperations()
           this.amount = 0
           this.cardNumber = ''
         } else {
@@ -310,13 +335,12 @@ export default {
     filterInput(event) {
       // Разрешаем только цифры
       if (!/[0-9]/.test(event.key) && event.key !== 'Backspace') {
-        event.preventDefault();
+        event.preventDefault()
       }
-    }
+    },
   },
   mounted() {
-    this.fetchUserProfile(),
-    this.fetchOperations()
+    this.fetchUserProfile(), this.fetchOperations()
   },
 }
 </script>

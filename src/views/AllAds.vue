@@ -243,6 +243,7 @@ export default {
         if (response.ok) {
           const data = await response.json()
           this.totalPages = data.totalPages
+          console.log(`Получено ${data.content.length} объявлений.`)
 
           if (page === 0) {
             this.ads = data.content
