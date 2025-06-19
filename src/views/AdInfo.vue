@@ -182,7 +182,8 @@ export default {
       defaultImage,
       lightboxVisible: false,
       currentImage: '',
-      check: false
+      newComment: '',
+      comments: []
     }
   },
   props: {
@@ -382,6 +383,114 @@ export default {
         return fullUrl
       }
       return photoUrl
+    },
+    async fetchAllComments() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/comments/all')
+        console.log(this.ad.id)
+        url.searchParams.append('adId', this.ad.id)
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.comments = await response.json()
+          console.log(this.comments)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки фотографий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async addComment() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      const formData = new FormData()
+      formData.append('textComment', this.newComment)
+      formData.append('adId', this.ad.id)
+      try {
+        const response = await fetch(`http://localhost:8080/api/comments/create`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+
+        console.log('Статус ответа:', response.status)
+        if (response.ok) {
+          this.newComment = ''
+          this.fetchAllComments()
+        } else {
+          const errorText = await response.text()
+          this.error = 'Ошибка создания объявления: ' + response.status + ' - ' + errorText
+          console.error('Ошибка сервера:', errorText)
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при создании объявления'
+        console.error('Исключение:', e)
+      }
+    },
+    async deleteComment(commentId) {
+      console.log(commentId)
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const response = await fetch(`http://localhost:8080/api/comments/delete/${commentId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.error = ''
+          this.fetchAd()
+          this.fetchAllComments()
+        } else if (response.status === 403) {
+          this.error = 'Вы не можете удалить этот комментарий'
+        } else if (response.status === 404) {
+          this.error = 'Комментарий не найден'
+        } else {
+          this.error = 'Ошибка удаления комментария: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при удалении комментария'
+        console.error('Исключение:', e)
+      }
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
     },
     showLightbox(imageUrl) {
       this.currentImage = this.checkPhoto(imageUrl)
