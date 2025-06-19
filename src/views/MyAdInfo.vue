@@ -165,6 +165,43 @@
               Удалить объявление
             </button>
           </p>
+          <div>
+            <div class="comments-section">
+              <h2>Комментарии</h2>
+              <div class="comment-form">
+                <textarea 
+                  v-model="newComment" 
+                  placeholder="Напишите ваш комментарий..."
+                  rows="3"
+                ></textarea>
+                <button class="btn custom-btn" @click="addComment" :disabled="!newComment.trim()">Добавить</button>
+              </div>
+              <div class="comments-list">
+                <div 
+                  v-for="(comment, index) in comments" 
+                  :key="index" 
+                  class="comment"
+                >
+                  <div class="comment-content">
+                    <span v-if="comment.user.id == user.id" class="comment-user" style="font-weight: 600;">Вы</span>
+                    <span v-else class="comment-user" style="font-weight: 600;">{{comment.user.username}}</span>
+                    <span class="comment-date" style="margin-left: 15px;">{{ formatDate(comment.createdAt) }}</span>
+                    <p>{{ comment.textComment }}</p>
+                  </div>
+                  <button 
+                    v-if="comment.user.id == user.id"
+                    @click="deleteComment(comment.id)"
+                    class="delete-btn"
+                    title="Удалить комментарий"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <p v-if="comments.length === 0" class="no-comments">Пока нет комментариев...</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -230,6 +267,8 @@ export default {
       defaultImage,
       lightboxVisible: false,
       currentImage: '',
+      newComment: '',
+      comments: []
     }
   },
   computed: {
@@ -276,6 +315,7 @@ export default {
 
         this.ad = await response.json()
         this.fetchAllPhoto()
+        this.fetchAllComments()
         this.adForm = {
           title: this.ad.title,
           description: this.ad.description || '',
@@ -428,7 +468,6 @@ export default {
         console.error('Исключение:', e)
       }
     },
-    
     async createPhoto() {
       const token = localStorage.getItem('jwt')
       if (!token) {
@@ -436,31 +475,23 @@ export default {
         this.$router.push('/login')
         return
       }
-
-      // Проверка наличия файлов
       if (!this.newPhotos || this.newPhotos.length === 0) {
         this.error = 'Нет файлов для загрузки'
         return
       }
-
       const formData = new FormData()
       formData.append('adId', this.ad.id)
-
-      // Добавляем КАЖДЫЙ файл отдельно с одинаковым именем поля 'photoFiles'
       this.newPhotos.forEach((file) => {
-        formData.append('photo', file) // Ключевое изменение - одинаковое имя поля
+        formData.append('photo', file)
       })
-
       try {
         const response = await fetch(`${this.serverBaseUrl}/api/photos/create`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
-            // Не добавляем Content-Type - браузер сам установит с boundary
           },
           body: formData,
         })
-
         if (response.ok) {
           await this.fetchAllPhoto()
           this.newPhotos = []
@@ -535,6 +566,103 @@ export default {
       }
       return photoUrl
     },
+    async fetchAllComments() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const url = new URL('http://localhost:8080/api/comments/all')
+        console.log(this.ad.id)
+        url.searchParams.append('adId', this.ad.id)
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.comments = await response.json()
+          console.log(this.comments)
+        } else if (response.status === 401 || response.status === 403) {
+          this.error = 'Сессия истекла или доступ запрещен'
+          localStorage.removeItem('jwt')
+          this.$router.push('/login')
+        } else {
+          this.error = 'Ошибка загрузки фотографий: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера'
+        console.error('Исключение:', e)
+      }
+    },
+    async addComment() {
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      const formData = new FormData()
+      formData.append('textComment', this.newComment)
+      formData.append('adId', this.ad.id)
+      try {
+        const response = await fetch(`http://localhost:8080/api/comments/create`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        })
+
+        console.log('Статус ответа:', response.status)
+        if (response.ok) {
+          this.newComment = ''
+          this.fetchAllComments()
+        } else {
+          const errorText = await response.text()
+          this.error = 'Ошибка создания объявления: ' + response.status + ' - ' + errorText
+          console.error('Ошибка сервера:', errorText)
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при создании объявления'
+        console.error('Исключение:', e)
+      }
+    },
+    async deleteComment(commentId) {
+      console.log(commentId)
+      const token = localStorage.getItem('jwt')
+      if (!token) {
+        this.error = 'Вы не авторизованы'
+        this.$router.push('/login')
+        return
+      }
+      try {
+        const response = await fetch(`http://localhost:8080/api/comments/delete/${commentId}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        if (response.ok) {
+          this.error = ''
+          this.fetchAd()
+          this.fetchAllComments()
+        } else if (response.status === 403) {
+          this.error = 'Вы не можете удалить этот комментарий'
+        } else if (response.status === 404) {
+          this.error = 'Комментарий не найден'
+        } else {
+          this.error = 'Ошибка удаления комментария: ' + response.status
+        }
+      } catch (e) {
+        this.error = 'Ошибка сервера при удалении комментария'
+        console.error('Исключение:', e)
+      }
+    },
     showLightbox(imageUrl) {
       this.currentImage = this.checkPhoto(imageUrl)
       this.lightboxVisible = true
@@ -549,6 +677,17 @@ export default {
       this.error = ''
       this.previewImage = null
       document.querySelector(dialogwindow).close()
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
     },
   },
   mounted() {
@@ -637,5 +776,73 @@ export default {
 .photo-management {
   margin-top: 20px;
   text-align: left;
+}
+
+.comments-section {
+  max-width: 100%;
+  margin: 0 auto;
+  /* padding: 20px; */
+}
+
+.comment-form {
+  margin-bottom: 30px;
+}
+
+.comment-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #2b8025;
+  border-radius: 20px;
+  resize: vertical;
+
+}
+
+.comment-form button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.comments-list {
+  border-top: 1px solid #eee;
+  padding-top: 2px;
+}
+
+.comment {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 1px solid #2b8025;
+  position: relative;
+}
+
+.comment-content p {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #888;
+}
+
+.no-comments {
+  text-align: center;
+  font-size: large;
+}
+
+.delete-btn {
+  border: 1px solid #2b8025;
+  border-radius: 15px;
+}
+.delete-btn:hover {
+  background-color: red;
+  color: white;
+  transition: .3s ease-in-out;
 }
 </style>

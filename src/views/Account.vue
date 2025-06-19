@@ -22,11 +22,23 @@
               <p>
                 <input
                   v-model="profile.location"
+                  type="text"
                   class="custom-text"
                   id="city"
                   style="width: 100%"
+                  @input="filterCities"
                 />
+                <datalist id="options" v-if="filteredCities.length">
+                  <option
+                    v-for="city in filteredCities"
+                    :key="city.city"
+                    @click="selectCity(city.city)"
+                  >
+                    {{ city.city }}
+                  </option>
+                </datalist>
               </p>
+              
               <label for="userdescription">Напишите о себе:</label>
               <p>
                 <textarea
@@ -224,6 +236,8 @@ export default {
       error: '',
       apiBaseUrl: 'http://localhost:8080/api/user',
       serverBaseUrl: 'http://localhost:8080',
+      filteredCities: [],
+      cities: []
     }
   },
   computed: {
@@ -369,6 +383,32 @@ export default {
         console.error('Исключение:', e)
       }
     },
+    async fetchCities() {
+      try {
+        const response = await fetch(
+          'https://gist.githubusercontent.com/gorborukov/0722a93c35dfba96337b/raw/c07da3ce0a429216dca76f96416e0414b7201817/russia',
+        )
+        this.cities = await response.json()
+      } catch (error) {
+        console.error('Ошибка загрузки данных:', error)
+      }
+    },
+    filterCities() {
+      if (this.profile.location) {
+        this.filteredCities = this.cities
+          .filter((city) => city.city.toLowerCase().includes(this.profile.location.toLowerCase()))
+          .slice(0, 5)
+      } else {
+        this.filteredCities = []
+      }
+    },
+    selectCity(city) {
+      this.profile.location = city
+      this.filteredCities = []
+    },
+  },
+  created() {
+    this.fetchCities()
   },
   mounted() {
     this.fetchUserProfile()
