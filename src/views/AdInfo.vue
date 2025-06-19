@@ -182,9 +182,7 @@ export default {
       defaultImage,
       lightboxVisible: false,
       currentImage: '',
-      check: false,
-      newComment: '',
-      comments: []    
+      check: false
     }
   },
   props: {
@@ -385,113 +383,6 @@ export default {
       }
       return photoUrl
     },
-    async fetchAllComments() {
-      const token = localStorage.getItem('jwt')
-      if (!token) {
-        this.error = 'Вы не авторизованы'
-        this.$router.push('/login')
-        return
-      }
-      try {
-        const url = new URL('http://localhost:8080/api/comments/all')
-        console.log(this.ad.id)
-        url.searchParams.append('adId', this.ad.id)
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        if (response.ok) {
-          this.comments = await response.json()
-          console.log(this.comments)
-        } else if (response.status === 401 || response.status === 403) {
-          this.error = 'Сессия истекла или доступ запрещен'
-          localStorage.removeItem('jwt')
-          this.$router.push('/login')
-        } else {
-          this.error = 'Ошибка загрузки фотографий: ' + response.status
-        }
-      } catch (e) {
-        this.error = 'Ошибка сервера'
-        console.error('Исключение:', e)
-      }
-    },
-    async addComment() {
-      const token = localStorage.getItem('jwt')
-      if (!token) {
-        this.error = 'Вы не авторизованы'
-        this.$router.push('/login')
-        return
-      }
-      const formData = new FormData()
-      formData.append('textComment', this.newComment)
-      formData.append('adId', this.ad.id)
-      try {
-        const response = await fetch(`http://localhost:8080/api/comments/create`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        })
-        console.log('Статус ответа:', response.status)
-        if (response.ok) {
-          this.newComment = ''
-          this.fetchAllComments()
-        } else {
-          const errorText = await response.text()
-          this.error = 'Ошибка создания объявления: ' + response.status + ' - ' + errorText
-          console.error('Ошибка сервера:', errorText)
-        }
-      } catch (e) {
-        this.error = 'Ошибка сервера при создании объявления'
-        console.error('Исключение:', e)
-      }
-    },
-    async deleteComment(commentId) {
-      console.log(commentId)
-      const token = localStorage.getItem('jwt')
-      if (!token) {
-        this.error = 'Вы не авторизованы'
-        this.$router.push('/login')
-        return
-      }
-      try {
-        const response = await fetch(`http://localhost:8080/api/comments/delete/${commentId}`, {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        if (response.ok) {
-          this.error = ''
-          this.fetchAd()
-          this.fetchAllComments()
-        } else if (response.status === 403) {
-          this.error = 'Вы не можете удалить этот комментарий'
-        } else if (response.status === 404) {
-          this.error = 'Комментарий не найден'
-        } else {
-          this.error = 'Ошибка удаления комментария: ' + response.status
-        }
-      } catch (e) {
-        this.error = 'Ошибка сервера при удалении комментария'
-        console.error('Исключение:', e)
-      }
-    },
-    formatDate(dateString) {
-      const date = new Date(dateString)
-      return date.toLocaleString('ru-RU', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-    },
     showLightbox(imageUrl) {
       this.currentImage = this.checkPhoto(imageUrl)
       this.lightboxVisible = true
@@ -554,4 +445,72 @@ export default {
   cursor: pointer;
  }
 
+
+.comments-section {
+  max-width: 100%;
+  margin: 0 auto;
+  /* padding: 20px; */
+}
+
+.comment-form {
+  margin-bottom: 30px;
+}
+
+.comment-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #2b8025;
+  border-radius: 20px;
+  resize: vertical;
+
+}
+
+.comment-form button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.comments-list {
+  border-top: 1px solid #eee;
+  padding-top: 2px;
+}
+
+.comment {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  border-radius: 20px;
+  border: 1px solid #2b8025;
+  position: relative;
+}
+
+.comment-content p {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #888;
+}
+
+.no-comments {
+  text-align: center;
+  font-size: large;
+}
+
+.delete-btn {
+  border: 1px solid #2b8025;
+  border-radius: 15px;
+}
+.delete-btn:hover {
+  background-color: red;
+  color: white;
+  transition: .3s ease-in-out;
+}
 </style>
